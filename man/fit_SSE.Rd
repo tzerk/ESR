@@ -1,0 +1,90 @@
+\name{fit_SSE}
+\alias{fit_SSE}
+\title{Fit and plot a dose response curve for ESR data (ESR intensity against dose)}
+\description{A dose response curve is produced for Electron Spin Resonance measurements
+using an additive dose protocol.}
+\usage{fit_SSE(input.data, fit.weights = "equal", bootstrap = FALSE, 
+    bootstrap.replicates = 999, output.console = TRUE, output.plot = TRUE, 
+    ...)}
+\arguments{
+  \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame with two columns
+for x=Dose, y=ESR.intensity. Optional: a third column containing 
+individual ESR intensity errors can be provided.}
+  \item{fit.weights}{\code{\link{logical}} (with default): option whether the fitting is 
+done with equal weights (\code{"equal"}) or weights proportional to 
+intensity (\code{"prop"}). If individual ESR intensity errors are 
+provided, these can be used as weights by using \code{"error"}.}
+  \item{bootstrap}{\code{\link{logical}} (with default): generate replicates of the input
+data for a nonparametric bootstrap. }
+  \item{bootstrap.replicates}{\code{\link{numeric}} (with default): amount of bootstrap replicates. }
+  \item{output.console}{\code{\link{logical}} (with default): plot console output 
+(\code{TRUE/FALSE}).}
+  \item{output.plot}{\code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).}
+  \item{\dots}{
+}
+}
+\details{\bold{Fitting methods} \cr\cr
+For fitting of the dose response curve the \code{nls} function with 
+the \code{port} algorithm is used. A single saturating exponential in the
+form of
+\deqn{y = a*(1-exp(-(x+c)/b))}
+is fitted to the data.
+Parameters b and c are approximated by a linear fit using \code{lm}.\cr\cr
+\bold{Fit weighting} \cr\cr
+If \code{"equal"} all datapoints are weighted equally. For
+\code{"prop"} the datapoints are weighted proportionally by their
+respective ESR intensity:
+\deqn{fit.weights = 1/intensity/(sum(1/intensity))}
+If individual errors on ESR intensity are
+available, choosing \code{"error"} enables weighting in the
+form of:
+\deqn{fit.weights = 1/error/(sum(1/error))} \cr\cr
+\bold{Bootstrap} \cr\cr
+If \code{bootstrap = TRUE} the function generates
+\code{bootstrap.replicates} replicates of the input data for
+nonparametric ordinary bootstrapping (resampling with
+replacement). For each bootstrap sample
+a dose response curve is constructed by fitting the chosen
+function and the equivalent dose is calculated. The distribution
+of bootstrapping results is shown in a histogram, while a
+a \code{\link{qqnorm}} plot is generated to give indications for
+(non-)normal distribution of the data.}
+\value{Returns terminal output and a plot. In addition, a list is returned 
+containing the following elements:
+
+\item{output}{data frame containing the De (De, De Error, D01 value).}
+\item{fit}{\code{nls} object containing the fit parameters}}
+\references{Efron, B. & Tibshirani, R., 1993. An Introduction to the Bootstrap. 
+Chapman & Hall. \cr\cr
+Davison, A.C. & Hinkley, D.V., 1997. Bootstrap Methods and Their 
+Application. Cambridge University Press. \cr\cr
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+dose and error calculation and display in OSL dating: An overview and 
+some recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
+Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., 
+Fuchs, M., 2012. Introducing an R package for luminescence dating analysis.
+Ancient TL, 30 (1), pp 1-8.}
+\author{Christoph Burow, University of Cologne (Germany)
+Who wrote it}
+\note{This function is largely derived from the \code{plot_GrowthCurve} function
+of the 'Luminescence' package by Kreutzer et al. (2012).\cr\cr
+\bold{Fitting methods} \cr
+Currently, only fitting of a single saturating exponential is
+supported. Fitting of two exponentials or an exponential with a linear term
+may be implemented in a future release. \cr\cr
+\bold{Bootstrap} \cr\cr
+While a higher number of replicates (bootstrap samples)
+is desirable, it is also increasingly computationally intensive. }
+
+
+\seealso{\code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
+\code{link{boot}}}
+\examples{
+
+##load example data
+data(ExampleData.De)
+
+##plot ESR sprectrum and peaks
+fit_SSE(input.data = ExampleData.De, fit.weights = "prop")
+
+}

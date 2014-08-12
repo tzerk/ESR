@@ -1,0 +1,41 @@
+\name{read_ESRspectrum}
+\alias{read_ESRspectrum}
+\title{Read in multiple associated ESR spectra}
+\description{Use this function to import a series of associated ESR spectra into R.}
+\usage{read_ESRspectrum(folder, file.ext = "txt", header = TRUE, sep = "")}
+\arguments{
+  \item{folder}{\code{\link{character}} (required): directory where the spectra files are 
+stored. Alternatively, a compressed zip file can be provided. See details!}
+  \item{file.ext}{\code{\link{character}}: import only files with a certain 
+extension}
+  \item{header}{\code{\link{logical}}: value indicating whether the file contains the names of the 
+variables as its first line.}
+  \item{sep}{\code{\link{character}}: the field separator character. Values on each line 
+of the file are separated by this character. If sep = "" (the default for read.table) 
+the separator is 'white space', that is one or more spaces, tabs, newlines 
+or carriage returns.}
+}
+\details{This is a wrapper function for \code{read.table}.
+The function should be used to read in a series of associated ESR spectrum
+files. A list with all spectrum data is returned, which can be passed to
+\code{plot_ESRspectrum} for plotting the spectra. \cr\cr
+\bold{Compressed zip archives}
+For \code{folder} a zip archive can be provided. The file has to have
+a .zip file extension and must contain all spectrum files in no subfolder.}
+\value{Returns a terminal output. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned.
+\cr\cr
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
+\references{In progress}
+\author{Christoph Burow, University of Cologne (Germany)
+Who wrote it}
+\note{# }
+
+
+\seealso{\code{\link{read.table}}}
+\examples{
+##no example yet
+print("SORRY, NO EXAMPLE YET")
+}

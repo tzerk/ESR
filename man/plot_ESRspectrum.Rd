@@ -1,0 +1,70 @@
+\name{plot_ESRspectrum}
+\alias{plot_ESRspectrum}
+\title{Plot ESR spectra and peak finding}
+\description{Function to plot an ESR spectrum and finding peaks using an automated
+routine. Peaks can also be picked manually to calculate
+the amplitude in intensity.}
+\usage{plot_ESRspectrum(input.data, difference = FALSE, smooth.spline = FALSE, 
+    smooth.spline.df, auto.shift = FALSE, find.peaks = FALSE, 
+    peak.range, peak.threshold = 10, peak.information = FALSE, 
+    manual.peaks = FALSE, manual.peaks.roi = FALSE, output.console = TRUE, 
+    output.plot = TRUE, ...)}
+\arguments{
+  \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame with two columns
+for x=magnetic.field or g.value, y=ESR.intensity.}
+  \item{difference}{\code{\link{logical}} (with default): plot difference of the spectrum }
+  \item{smooth.spline}{\code{\link{logical}} (with default): fit a cubic smoothing spline to 
+supplied spectrum.}
+  \item{smooth.spline.df}{\code{\link{integer}}: desired number of degrees of freedom}
+  \item{auto.shift}{\code{\link{logical}} (with default): automatically shift multiple
+spectra by their maximum peak. This uses smoothing splines for
+better results.}
+  \item{find.peaks}{\code{\link{logical}} (with default): find and plot peaks 
+(\code{TRUE/FALSE}).}
+  \item{peak.range}{\code{\link{integer}} (with default): range of magnetic field intensities
+or g-values in which peaks are picked from \code{c(from, to)}. If no 
+values are provide the whole spectrum is analysed.}
+  \item{peak.threshold}{\code{\link{integer}} (with default): threshold value specifying the  
+resolution of the peak finding routine (see details).}
+  \item{peak.information}{\code{\link{logical}} (with default): plot peak intensity values for
+peaks found by the automated routine (\code{TRUE/FALSE}).
+Applies only when \code{find.peaks = TRUE}.}
+  \item{manual.peaks}{\code{\link{logical}} (with default): manually identify xy-coordinates
+to be used for amplitude calculation (\code{TRUE/FALSE}).}
+  \item{manual.peaks.roi}{\code{\link{logical}} (with default): define area for the plot to be zoomed
+in to allow for a more precise manual peak picking (\code{TRUE/FALSE}).
+Applies only when \code{manual.peaks = TRUE}.}
+  \item{output.console}{\code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).
+(\code{TRUE/FALSE}).}
+  \item{output.plot}{\code{\link{logical}} (with default): show plot (\code{TRUE/FALSE}).
+(\code{TRUE/FALSE}).}
+  \item{\dots}{Further plot arguments to pass.}
+}
+\details{\bold{Status} \cr\cr
+In progress}
+\value{Returns terminal output and a plot. In addition, a list is returned 
+containing the following elements:
+
+\item{auto.peaks}{data frame containing the peak information (magnetic field
+and ESR intensity) found by the peak find routine.}
+\item{manual.peaks}{vector containing the peak information (magnetic field,
+ESR intensity and amplitude) from the manually identified peaks.}}
+\references{In progress}
+\author{Christoph Burow, University of Cologne (Germany)
+Who wrote it}
+\note{In progress}
+
+
+\seealso{\code{\link{plot}}}
+\examples{
+
+##load example data
+data(ExampleData.dpph)
+
+##plot ESR sprectrum and peaks
+plot_ESRspectrum(ExampleData.dpph, find.peaks = TRUE,
+                 peak.range = c(3340,3355),
+                 peak.threshold = 10, peak.information = TRUE,
+                 output.console = TRUE)
+
+}
