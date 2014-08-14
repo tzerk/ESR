@@ -22,6 +22,9 @@ structure(function(# Plot ESR spectra and peak finding
   ### supplied spectrum.
   smooth.spline.df,
   ### \code{\link{integer}}: desired number of degrees of freedom
+  overlay = TRUE,
+  ### \code{\link{logical}} (with default): overlay actual data and smoothing 
+  ### spline curve in one plot.
   auto.shift = FALSE,
   ### \code{\link{logical}} (with default): automatically shift multiple
   ### spectra by their maximum peak. This uses smoothing splines for
@@ -74,20 +77,22 @@ structure(function(# Plot ESR spectra and peak finding
       input.data <- get_RLum.Data.Curve(input.data)
     }
   } else {
+    
+    #2. verify if data frame has two or three columns
+    if(is.data.frame(input.data) == TRUE) {
+      if(length(input.data) != 2) {
+        cat(paste("Please provide a data frame with two columns",
+                  "(x=magnetic.field, y=ESR.intensity)"),
+            fill = FALSE) 
+        stop(domain=NA)
+      }
+    }
+    
     input.data<- list(input.data)
   }
   
   
-  #2. verify if data frame has two or three columns
-  if(is.data.frame(input.data) == TRUE) {
-    if(length(input.data) != 2) {
-      cat(paste("Please provide a data frame with two columns",
-                "(x=magnetic.field, y=ESR.intensity"),
-          fill = FALSE) 
-      stop(domain=NA)
-    }
-  }
-
+ 
   ##==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ##==========================================================================##
@@ -136,7 +141,8 @@ structure(function(# Plot ESR spectra and peak finding
   if("xlim" %in% names(extraArgs)) {
     xlim <- extraArgs$xlim
   } else {
-    xlim<- c(min(input.data[[1]][1]), max(input.data[[1]][1]))
+    #xlim<- c(min(input.data[[1]][1])*0.9998, max(input.data[[1]][1])*1.0002)
+    xlim <- range(pretty(c(min(input.data[[1]][1]), max(input.data[[1]][1]))))
   }
   
   if("main" %in% names(extraArgs)) {
@@ -173,6 +179,42 @@ structure(function(# Plot ESR spectra and peak finding
     legend.pos <- extraArgs$legend.pos
   } else {
     legend.pos<- "topright"
+  }
+  
+  if("type" %in% names(extraArgs)) {
+    type <- extraArgs$type
+  } else {
+    type <- "l"
+  }
+  
+  if("pch" %in% names(extraArgs)) {
+    pch <- extraArgs$pch
+  } else {
+    pch <- 1
+  }
+  
+  if("col" %in% names(extraArgs)) {
+    col <- extraArgs$col
+  } else {
+    col <- "black"
+  }
+  
+  if("lty" %in% names(extraArgs)) {
+    lty <- extraArgs$lty
+  } else {
+    lty <- 1
+  }
+  
+  if("lwd" %in% names(extraArgs)) {
+    lwd <- extraArgs$lwd
+  } else {
+    lwd <- 1
+  }
+  
+  if("id" %in% names(extraArgs)) {
+    id<- extraArgs$id
+  } else {
+    id<- FALSE
   }
   
   ##==========================================================================##
@@ -326,26 +368,19 @@ structure(function(# Plot ESR spectra and peak finding
     )
     
     #general plot parameters
-    par(cex = cex, xaxs = "i", yaxs = "i", mar = c(5, 4, 4, 2)+0.1) 
+    par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 2, 2)+0.2) 
  
-    
-    if(smooth.spline == TRUE) {
-      col<- "gray66"
-    } else {
-      col<- "black"
-    }
     
     # create empty plot
     plot(NA, NA,
          main=main,
          ylim=ylim,
          xlim=xlim,
-         type="l",
-         bty="l",
-         col=col,
+         bty="n",
          xpd = FALSE, #overplotting
          xlab=xlab,
          ylab=ylab)
+    
     
     if(length(input.data) > 1) {
       
@@ -354,26 +389,47 @@ structure(function(# Plot ESR spectra and peak finding
            col = "grey90")
       
       grid(col = "white", lwd = 1, lty = 1)
-      
-      lwd<- 1.5
-      
-    } else {
-      lwd<- 1
+    
     }
     
     # add sprectum lines (either measured data or splines)
     for(i in 1:length(input.data)) {
+      
+      if(length(input.data) > 1) {
+        col<- colororder
+      }
+      
       if(smooth.spline == TRUE) {
-        lines(spline[[i]], col = colororder[i], lwd = lwd)
+        lines(spline[[i]],
+              col = col[i], 
+              lwd = lwd, 
+              lty = lty, 
+              type = type, 
+              pch = pch)
+        
+        if(overlay == TRUE) {
+          lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
+                col = adjustcolor(col = col[i], alpha.f = 0.33), 
+                lwd = lwd, 
+                lty = lty, 
+                type = type,
+                pch = pch)
+        }
       } else {
-        lines(x = input.data[[i]]$x, y = input.data[[i]]$y, col = i, lwd = lwd)
+        lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
+              col = col[i], 
+              lwd = lwd, 
+              lty = lty, 
+              type = type,
+              pch = pch)
       }
     }
     
     # add legend
     if(length(input.data) > 1 && legend == TRUE) { 
-      legend(legend.pos, legend = colnames, lty = 1, lwd = 3, col = colororder, cex = 0.8, ncol = 2)
+      legend(legend.pos, legend = colnames, lty = 1, lwd = 3, col = col, cex = 0.8, ncol = 2)
     }
+    
     
     
     temp.plot<- recordPlot()
@@ -391,9 +447,17 @@ structure(function(# Plot ESR spectra and peak finding
       
       #label min/max peaks
       if(peak.information == TRUE && length(all.peaks$magnetic.field) != 0) {
-        text(all.peaks$magnetic.field, all.peaks$ESR.intensity,
-             labels = round(all.peaks$ESR.intensity),
-             pos = 2, cex = 0.8, xpd = TRUE)
+        
+        if(id == TRUE) {
+          text(all.peaks$magnetic.field, all.peaks$ESR.intensity,
+               labels = 1:length(all.peaks$ESR.intensity),
+               pos = 2, cex = 0.8, xpd = TRUE)
+        } else {
+          text(all.peaks$magnetic.field, all.peaks$ESR.intensity,
+               labels = round(all.peaks$ESR.intensity),
+               pos = 2, cex = 0.8, xpd = TRUE)
+        }
+ 
       }
       
       temp.plot<- recordPlot()

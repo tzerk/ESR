@@ -5,7 +5,7 @@
 routine. Peaks can also be picked manually to calculate
 the amplitude in intensity.}
 \usage{plot_ESRspectrum(input.data, difference = FALSE, smooth.spline = FALSE, 
-    smooth.spline.df, auto.shift = FALSE, find.peaks = FALSE, 
+    smooth.spline.df, overlay = TRUE, auto.shift = FALSE, find.peaks = FALSE, 
     peak.range, peak.threshold = 10, peak.information = FALSE, 
     manual.peaks = FALSE, manual.peaks.roi = FALSE, output.console = TRUE, 
     output.plot = TRUE, ...)}
@@ -16,6 +16,8 @@ for x=magnetic.field or g.value, y=ESR.intensity.}
   \item{smooth.spline}{\code{\link{logical}} (with default): fit a cubic smoothing spline to 
 supplied spectrum.}
   \item{smooth.spline.df}{\code{\link{integer}}: desired number of degrees of freedom}
+  \item{overlay}{\code{\link{logical}} (with default): overlay actual data and smoothing 
+spline curve in one plot.}
   \item{auto.shift}{\code{\link{logical}} (with default): automatically shift multiple
 spectra by their maximum peak. This uses smoothing splines for
 better results.}

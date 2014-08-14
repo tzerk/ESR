@@ -61,7 +61,6 @@ structure(function(# Read in multiple associated ESR spectra
   
     filelist<- get_filelist(folder)
     
-    
     for(i in 1:length(filelist)) {
        data<- lapply(filelist,
                      function(x) read.table(unz(folder, x), header = header, sep = sep))
