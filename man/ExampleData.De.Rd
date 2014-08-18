@@ -7,7 +7,7 @@ Synthetic ESR equivalent dose data set
 \description{
 Synthetic ESR equivalent dose data set
 }
-\usage{data(ExampleData.De)}
+\usage{ExampleData.De}
 \format{
   A data frame with 2 observations on the following 2 variables.
   \describe{

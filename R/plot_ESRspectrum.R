@@ -50,6 +50,8 @@ structure(function(# Plot ESR spectra and peak finding
   ### \code{\link{logical}} (with default): define area for the plot to be zoomed
   ### in to allow for a more precise manual peak picking (\code{TRUE/FALSE}).
   ### Applies only when \code{manual.peaks = TRUE}.
+  info, 
+  ### \code{\link{character}}: add information on experimental details as subtitle 
   output.console = TRUE,
   ### \code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).
   ### (\code{TRUE/FALSE}).
@@ -58,7 +60,7 @@ structure(function(# Plot ESR spectra and peak finding
   ### (\code{TRUE/FALSE}).
   ...
   ### Further plot arguments to pass.
-
+  
 ) {
   
   
@@ -92,7 +94,7 @@ structure(function(# Plot ESR spectra and peak finding
   }
   
   
- 
+  
   ##==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ##==========================================================================##
@@ -116,6 +118,11 @@ structure(function(# Plot ESR spectra and peak finding
   
   #label input.data data frame for easier addressing
   input.data<- lapply(input.data, function (x) { colnames(x)<- c("x","y"); x })
+  
+  # check for experimental information
+  if(missing(info) == TRUE) {
+    info<- NULL
+  }
   
   
   ##==========================================================================##
@@ -154,19 +161,19 @@ structure(function(# Plot ESR spectra and peak finding
   if("xlab" %in% names(extraArgs)) {
     xlab <- extraArgs$xlab
   } else {
-  xlab<- expression("Magnetic field [G]") 
+    xlab<- expression("Magnetic field [G]") 
   }
   
   if("ylab" %in% names(extraArgs)) {
     ylab <- extraArgs$ylab
   } else {
-  ylab<- c(paste("ESR intensity [a.u.]", sep=""))
+    ylab<- c(paste("ESR intensity [a.u.]", sep=""))
   }
   
   if("cex" %in% names(extraArgs)) {
     cex <- extraArgs$cex
   } else {
-  cex<- 1
+    cex<- 1
   }
   
   if("legend" %in% names(extraArgs)) {
@@ -367,19 +374,73 @@ structure(function(# Plot ESR spectra and peak finding
       rgb(0.99, 0.41, 0.23)
     )
     
-    #general plot parameters
-    par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 2, 2)+0.2) 
- 
+    if(is.null(info) == TRUE) {
+      #general plot parameters
+      par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 2, 2)+0.2) 
+    } else {
+      #general plot parameters
+      par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 6, 2)+0.2) 
+    }
+
+    
     
     # create empty plot
     plot(NA, NA,
-         main=main,
          ylim=ylim,
          xlim=xlim,
          bty="n",
          xpd = FALSE, #overplotting
          xlab=xlab,
          ylab=ylab)
+    
+    # add plot title
+    title(main, line = if(is.null(info) == TRUE){1}else{5}, cex = 0.8)
+    
+    
+    
+    ## add subtitle experimental settings
+    if(is.null(info) == FALSE) {
+
+      
+      # 1. add input fields
+      
+      inf<- list(inf.rec = c("Receiver Gain", "Phase", "Harmonic", "Mod. Freq.", "Mod Amplitude"),
+                 inf.sig= c("Conversion", "Time Const", "Sweep Time", "Number of Scans"),
+                 inf.field= c("Center Field", "Sweep Width", "Resolution"),
+                 inf.mw= c("Frequency", "Power"))
+      
+      at.adj<- c(0.0, 0.275, 0.55, 0.825)
+      
+      for(i in 1:length(inf)){
+        k<- 4.5
+        
+        for(j in 1:length(inf[[i]])){
+          
+          k<- k-1
+          mtext(text = inf[[i]][j],
+                side = 3, line = k, cex=0.7, adj = 0,
+                at=par("usr")[1]+at.adj[i]*diff(par("usr")[1:2]))
+          
+        }
+      }
+      
+      # 2. add values
+      at.adj<- c(0.11, 0.405, 0.65, 0.91)
+      
+      for(i in 1:length(info)){
+        k<- 4.5
+        
+        for(j in 1:length(info[[i]])){
+          
+          k<- k-1
+          mtext(text = paste(": ",info[[i]][j]),
+                side = 3, line = k, cex=0.7, adj = 0,
+                at=par("usr")[1]+at.adj[i]*diff(par("usr")[1:2]))
+          
+        }
+      }
+      
+    }
     
     
     if(length(input.data) > 1) {
@@ -389,7 +450,7 @@ structure(function(# Plot ESR spectra and peak finding
            col = "grey90")
       
       grid(col = "white", lwd = 1, lty = 1)
-    
+      
     }
     
     # add sprectum lines (either measured data or splines)
@@ -434,7 +495,7 @@ structure(function(# Plot ESR spectra and peak finding
     
     temp.plot<- recordPlot()
     
-
+    
     ##==========================================================================##
     ## AUTOMATIC PEAK FINDING
     ##==========================================================================##
@@ -457,7 +518,7 @@ structure(function(# Plot ESR spectra and peak finding
                labels = round(all.peaks$ESR.intensity),
                pos = 2, cex = 0.8, xpd = TRUE)
         }
- 
+        
       }
       
       temp.plot<- recordPlot()
@@ -602,12 +663,37 @@ structure(function(# Plot ESR spectra and peak finding
 }, ex = function() {
   
   ##load example data
-  data(ExampleData.dpph)
+  data(ExampleData.ESRspectra)
   
-  ##plot ESR sprectrum and peaks
-  plot_ESRspectrum(ExampleData.dpph, find.peaks = TRUE,
+  ##plot dpph and use the automatic peak finding routine
+  plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
                    peak.range = c(3340,3355),
                    peak.threshold = 10, peak.information = TRUE,
                    output.console = TRUE)
+  
+  # 
+  
+  ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
+  plot_ESRspectrum(ExampleData.ESRspectra$Ba01_00,
+                   smooth.spline = TRUE,
+                   smooth.spline.df = 40,
+                   overlay = TRUE)
+  
+  
+  ##plot all ESR spectra of sample Ba01
+  plot_ESRspectrum(ExampleData.ESRspectra$Ba01)
+  
+  ##plot all ESR spectra of sample Ba01 and align curves by the max peak
+  plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+                   auto.shift = TRUE)
+  
+  ##plot all ESR spectra of sample Ba01, use smoothing splines and
+  ##align curves by the max peak
+  plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+                   smooth.spline = TRUE,
+                   smooth.spline.df = 40,
+                   auto.shift = TRUE,
+                   overlay = FALSE)
+  
   
 })

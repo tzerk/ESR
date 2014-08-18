@@ -7,7 +7,7 @@ the amplitude in intensity.}
 \usage{plot_ESRspectrum(input.data, difference = FALSE, smooth.spline = FALSE, 
     smooth.spline.df, overlay = TRUE, auto.shift = FALSE, find.peaks = FALSE, 
     peak.range, peak.threshold = 10, peak.information = FALSE, 
-    manual.peaks = FALSE, manual.peaks.roi = FALSE, output.console = TRUE, 
+    manual.peaks = FALSE, manual.peaks.roi = FALSE, info, output.console = TRUE, 
     output.plot = TRUE, ...)}
 \arguments{
   \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame with two columns
@@ -36,6 +36,7 @@ to be used for amplitude calculation (\code{TRUE/FALSE}).}
   \item{manual.peaks.roi}{\code{\link{logical}} (with default): define area for the plot to be zoomed
 in to allow for a more precise manual peak picking (\code{TRUE/FALSE}).
 Applies only when \code{manual.peaks = TRUE}.}
+  \item{info}{\code{\link{character}}: add information on experimental details as subtitle }
   \item{output.console}{\code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).
 (\code{TRUE/FALSE}).}
   \item{output.plot}{\code{\link{logical}} (with default): show plot (\code{TRUE/FALSE}).
@@ -61,12 +62,37 @@ Who wrote it}
 \examples{
 
 ##load example data
-data(ExampleData.dpph)
+data(ExampleData.ESRspectra)
 
-##plot ESR sprectrum and peaks
-plot_ESRspectrum(ExampleData.dpph, find.peaks = TRUE,
+##plot dpph and use the automatic peak finding routine
+plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
                  peak.range = c(3340,3355),
                  peak.threshold = 10, peak.information = TRUE,
                  output.console = TRUE)
+
+# 
+
+##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
+plot_ESRspectrum(ExampleData.ESRspectra$Ba01_00,
+                 smooth.spline = TRUE,
+                 smooth.spline.df = 40,
+                 overlay = TRUE)
+
+
+##plot all ESR spectra of sample Ba01
+plot_ESRspectrum(ExampleData.ESRspectra$Ba01)
+
+##plot all ESR spectra of sample Ba01 and align curves by the max peak
+plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+                 auto.shift = TRUE)
+
+##plot all ESR spectra of sample Ba01, use smoothing splines and
+##align curves by the max peak
+plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+                 smooth.spline = TRUE,
+                 smooth.spline.df = 40,
+                 auto.shift = TRUE,
+                 overlay = FALSE)
+
 
 }
