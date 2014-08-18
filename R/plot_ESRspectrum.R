@@ -224,6 +224,12 @@ structure(function(# Plot ESR spectra and peak finding
     id<- FALSE
   }
   
+  if("amplitudes" %in% names(extraArgs)) {
+    amplitudes<- extraArgs$amplitudes
+  } else {
+    amplitudes<- NULL
+  }
+  
   ##==========================================================================##
   ## CUBIC SMOOTHING SPLINE
   ##==========================================================================##
@@ -396,14 +402,10 @@ structure(function(# Plot ESR spectra and peak finding
     # add plot title
     title(main, line = if(is.null(info) == TRUE){1}else{5}, cex = 0.8)
     
-    
-    
     ## add subtitle experimental settings
     if(is.null(info) == FALSE) {
-
       
       # 1. add input fields
-      
       inf<- list(inf.rec = c("Receiver Gain", "Phase", "Harmonic", "Mod. Freq.", "Mod Amplitude"),
                  inf.sig= c("Conversion", "Time Const", "Sweep Time", "Number of Scans"),
                  inf.field= c("Center Field", "Sweep Width", "Resolution"),
@@ -413,44 +415,63 @@ structure(function(# Plot ESR spectra and peak finding
       
       for(i in 1:length(inf)){
         k<- 4.5
-        
         for(j in 1:length(inf[[i]])){
-          
           k<- k-1
           mtext(text = inf[[i]][j],
                 side = 3, line = k, cex=0.7, adj = 0,
                 at=par("usr")[1]+at.adj[i]*diff(par("usr")[1:2]))
-          
         }
       }
-      
       # 2. add values
       at.adj<- c(0.11, 0.405, 0.65, 0.91)
       
       for(i in 1:length(info)){
         k<- 4.5
-        
         for(j in 1:length(info[[i]])){
-          
           k<- k-1
           mtext(text = paste(": ",info[[i]][j]),
                 side = 3, line = k, cex=0.7, adj = 0,
                 at=par("usr")[1]+at.adj[i]*diff(par("usr")[1:2]))
-          
         }
       }
-      
     }
     
-    
-    if(length(input.data) > 1) {
+    # add amplitude lines
+    if(is.null(amplitudes) == FALSE) {
+      x1<- amplitudes[1]
+      x2<- amplitudes[2]
       
-      # background of the plot region
+      temp.data<- input.data[[1]]
+      
+      y1<- temp.data[which.min(abs(temp.data[,1] - x1)),2]
+      y2<- temp.data[which.min(abs(temp.data[,1] - x2)),2]
+      
+      lines(x = c(x1, x1), 
+            y = c(y1, y2), 
+            lty = 2, col = "grey")
+      
+      lines(x = c(x1, x2),
+            y = c(y2, y2), 
+            lty = 2, col = "grey")
+      
+      amp<- as.expression(bquote(italic(hat(u)) ~ 
+                                   "=" ~
+                                 .(abs(y1-y2))))
+      
+      if(amplitudes[1] < amplitudes[2]) {
+        text(x = min(amplitudes), y = min(c(y1,y2)), labels = amp, pos = 1, cex = 0.8)  
+      } else {
+        text(x = max(amplitudes), y = max(c(y1,y2)), labels = amp, pos = 3, , cex = 0.8)  
+      }
+    
+    }
+    
+    # background of the plot region
+    if(length(input.data) > 1) {
       rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
            col = "grey90")
       
       grid(col = "white", lwd = 1, lty = 1)
-      
     }
     
     # add sprectum lines (either measured data or splines)
@@ -491,8 +512,6 @@ structure(function(# Plot ESR spectra and peak finding
       legend(legend.pos, legend = colnames, lty = 1, lwd = 3, col = col, cex = 0.8, ncol = 2)
     }
     
-    
-    
     temp.plot<- recordPlot()
     
     
@@ -518,9 +537,7 @@ structure(function(# Plot ESR spectra and peak finding
                labels = round(all.peaks$ESR.intensity),
                pos = 2, cex = 0.8, xpd = TRUE)
         }
-        
       }
-      
       temp.plot<- recordPlot()
     }
     
