@@ -1,9 +1,11 @@
 Package: ESR
 Type: Package
 Title: Package for Electron Spin Resonance Dating data analysis
-Version: 1.2.2
-Date: 2014-08-18
-Author: Christoph Burow
+Version: 1.2.3
+Date: 2014-08-19
+Author: Christoph Burow [aut, trl, cre]
+Authors@R: c(person("Christoph", "Burow", role = c("aut","cre"),
+                          email = "christoph.burow@uni-koeln.de"))
 Maintainer: Christoph Burow <christoph.burow@uni-koeln.de>
 Description: Package provides a collection of various R functions for Electron Spin Resonance Dating data analysis
 License: GPL-3

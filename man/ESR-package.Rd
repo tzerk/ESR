@@ -5,10 +5,11 @@
 \title{Collection of functions for Electron Spin Resonance Dating data analysis}
 \description{This package provides various functions developed for the purpose of Electron Spin Resonance Dating data analysis.}
 \details{
-\tabular{ll}{Package: \tab ESR\cr
+\tabular{ll}{
+Package: \tab ESR\cr
 Type: \tab Package\cr
 Version: \tab 1.2.2\cr
-Date: \tab 2014-08-18\cr
+Date: \tab 2014-08-19\cr
 Author: \tab Christoph Burow \cr
 Maintainer: \tab Christoph Burow <christoph.burow@uni-koeln.de>\cr
 License: \tab GPL-3\cr}

@@ -62,7 +62,7 @@ Who wrote it}
 \examples{
 
 ##load example data
-data(ExampleData.ESRspectra)
+data(ExampleData.ESRspectra, envir = environment())
 
 ##plot dpph and use the automatic peak finding routine
 plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
@@ -70,14 +70,11 @@ plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
                  peak.threshold = 10, peak.information = TRUE,
                  output.console = TRUE)
 
-# 
-
 ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
 plot_ESRspectrum(ExampleData.ESRspectra$Ba01_00,
                  smooth.spline = TRUE,
                  smooth.spline.df = 40,
                  overlay = TRUE)
-
 
 ##plot all ESR spectra of sample Ba01
 plot_ESRspectrum(ExampleData.ESRspectra$Ba01)

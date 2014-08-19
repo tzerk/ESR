@@ -64,6 +64,15 @@ may be implemented in a future release.}
 \seealso{\code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
 \code{\link{fit_SSE}}}
 \examples{
-#There is no example
-print("NO EXAMPLE YET")
+
+##load example data
+data(ExampleData.De, envir = environment())
+
+#calculate and plot De-Dmax Plateau
+calc_DePlateau(input.data = ExampleData.De,
+               min.DosePoints = 5, 
+               fit.weights = "prop", 
+               show.grid = TRUE, 
+               output.console = FALSE)
+
 }

@@ -36,6 +36,5 @@ Who wrote it}
 
 \seealso{\code{\link{read.table}}}
 \examples{
-##no example yet
-print("SORRY, NO EXAMPLE YET")
+##no example
 }

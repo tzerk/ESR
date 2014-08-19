@@ -135,6 +135,5 @@ structure(function(# Read in multiple associated ESR spectra
   ## # 
   
 }, ex = function() {
-  ##no example yet
-  print("SORRY, NO EXAMPLE YET")
+  ##no example
 })

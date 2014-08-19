@@ -82,7 +82,7 @@ is desirable, it is also increasingly computationally intensive. }
 \examples{
 
 ##load example data
-data(ExampleData.De)
+data(ExampleData.De, envir = environment())
 
 ##plot ESR sprectrum and peaks
 fit_SSE(input.data = ExampleData.De, fit.weights = "prop")

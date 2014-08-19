@@ -1,5 +1,4 @@
-plot_ESRspectrum <-
-structure(function(# Plot ESR spectra and peak finding
+plot_ESRspectrum<- structure(function(# Plot ESR spectra and peak finding
   ###Function to plot an ESR spectrum and finding peaks using an automated
   ###routine. Peaks can also be picked manually to calculate
   ###the amplitude in intensity.
@@ -385,7 +384,7 @@ structure(function(# Plot ESR spectra and peak finding
       par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 2, 2)+0.2) 
     } else {
       #general plot parameters
-      par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 6, 2)+0.2) 
+      par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 7, 2)+0.2) 
     }
 
     
@@ -400,7 +399,7 @@ structure(function(# Plot ESR spectra and peak finding
          ylab=ylab)
     
     # add plot title
-    title(main, line = if(is.null(info) == TRUE){1}else{5}, cex = 0.8)
+    title(main, line = if(is.null(info) == TRUE){1}else{6}, cex = 0.8)
     
     ## add subtitle experimental settings
     if(is.null(info) == FALSE) {
@@ -414,7 +413,7 @@ structure(function(# Plot ESR spectra and peak finding
       at.adj<- c(0.0, 0.275, 0.55, 0.825)
       
       for(i in 1:length(inf)){
-        k<- 4.5
+        k<- 5.5
         for(j in 1:length(inf[[i]])){
           k<- k-1
           mtext(text = inf[[i]][j],
@@ -426,7 +425,7 @@ structure(function(# Plot ESR spectra and peak finding
       at.adj<- c(0.11, 0.405, 0.65, 0.91)
       
       for(i in 1:length(info)){
-        k<- 4.5
+        k<- 5.5
         for(j in 1:length(info[[i]])){
           k<- k-1
           mtext(text = paste(": ",info[[i]][j]),
@@ -643,6 +642,9 @@ structure(function(# Plot ESR spectra and peak finding
   if(find.peaks == TRUE && length(input.data) == 1) {
     man.peaks<- NULL
   }
+  if(smooth.spline == FALSE) {
+    spline<- NULL    
+  }
   
   if(manual.peaks == TRUE  && length(input.data) == 1) {
     man.peaks<- data.frame(peak1_field = input.data[[1]]$x[1],
@@ -653,11 +655,15 @@ structure(function(# Plot ESR spectra and peak finding
   }
   
   # return output data.frame and nls.object fit
-  invisible(list(auto.peaks = all.peaks,
+  invisible(list(data = input.data,
+                 splines = spline,
+                 auto.peaks = all.peaks,
                  manual.peaks = manual.peaks))
   ### Returns terminal output and a plot. In addition, a list is returned 
   ### containing the following elements:
   ###
+  ### \item{data}{list containing the (modified) input data
+  ### \item{splines}{list containing the spline objects
   ### \item{auto.peaks}{data frame containing the peak information (magnetic field
   ### and ESR intensity) found by the peak find routine.}
   ### \item{manual.peaks}{vector containing the peak information (magnetic field,
@@ -677,10 +683,10 @@ structure(function(# Plot ESR spectra and peak finding
   ##note<<
   ## In progress
   
-}, ex = function() {
+},ex=function() {
   
   ##load example data
-  data(ExampleData.ESRspectra)
+  data(ExampleData.ESRspectra, envir = environment())
   
   ##plot dpph and use the automatic peak finding routine
   plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
@@ -688,14 +694,11 @@ structure(function(# Plot ESR spectra and peak finding
                    peak.threshold = 10, peak.information = TRUE,
                    output.console = TRUE)
   
-  # 
-  
   ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
   plot_ESRspectrum(ExampleData.ESRspectra$Ba01_00,
                    smooth.spline = TRUE,
                    smooth.spline.df = 40,
                    overlay = TRUE)
-  
   
   ##plot all ESR spectra of sample Ba01
   plot_ESRspectrum(ExampleData.ESRspectra$Ba01)
@@ -713,4 +716,4 @@ structure(function(# Plot ESR spectra and peak finding
                    overlay = FALSE)
   
   
-})
+})#::EndOf Function

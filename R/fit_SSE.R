@@ -453,7 +453,7 @@ structure(function(# Fit and plot a dose response curve for ESR data (ESR intens
 }, ex = function(){
   
   ##load example data
-  data(ExampleData.De)
+  data(ExampleData.De, envir = environment())
   
   ##plot ESR sprectrum and peaks
   fit_SSE(input.data = ExampleData.De, fit.weights = "prop")
