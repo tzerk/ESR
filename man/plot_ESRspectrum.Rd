@@ -48,6 +48,8 @@ In progress}
 \value{Returns terminal output and a plot. In addition, a list is returned 
 containing the following elements:
 
+\item{data}{list containing the (modified) input data}
+\item{splines}{list containing the spline objects}
 \item{auto.peaks}{data frame containing the peak information (magnetic field
 and ESR intensity) found by the peak find routine.}
 \item{manual.peaks}{vector containing the peak information (magnetic field,

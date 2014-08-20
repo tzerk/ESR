@@ -1,4 +1,5 @@
-plot_ESRspectrum<- structure(function(# Plot ESR spectra and peak finding
+plot_ESRspectrum <-
+structure(function(# Plot ESR spectra and peak finding
   ###Function to plot an ESR spectrum and finding peaks using an automated
   ###routine. Peaks can also be picked manually to calculate
   ###the amplitude in intensity.
@@ -662,8 +663,8 @@ plot_ESRspectrum<- structure(function(# Plot ESR spectra and peak finding
   ### Returns terminal output and a plot. In addition, a list is returned 
   ### containing the following elements:
   ###
-  ### \item{data}{list containing the (modified) input data
-  ### \item{splines}{list containing the spline objects
+  ### \item{data}{list containing the (modified) input data}
+  ### \item{splines}{list containing the spline objects}
   ### \item{auto.peaks}{data frame containing the peak information (magnetic field
   ### and ESR intensity) found by the peak find routine.}
   ### \item{manual.peaks}{vector containing the peak information (magnetic field,
@@ -683,7 +684,7 @@ plot_ESRspectrum<- structure(function(# Plot ESR spectra and peak finding
   ##note<<
   ## In progress
   
-},ex=function() {
+}, ex = function() {
   
   ##load example data
   data(ExampleData.ESRspectra, envir = environment())
@@ -716,4 +717,4 @@ plot_ESRspectrum<- structure(function(# Plot ESR spectra and peak finding
                    overlay = FALSE)
   
   
-})#::EndOf Function
+})
