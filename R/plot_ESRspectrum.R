@@ -441,7 +441,12 @@ structure(function(# Plot ESR spectra and peak finding
       x1<- amplitudes[1]
       x2<- amplitudes[2]
       
-      temp.data<- input.data[[1]]
+      if(smooth.spline == TRUE) {
+        temp.data<- cbind(spline[[1]]$x, spline[[1]]$y)
+        } else {
+        temp.data<- input.data[[1]]
+      }
+        
       
       y1<- temp.data[which.min(abs(temp.data[,1] - x1)),2]
       y2<- temp.data[which.min(abs(temp.data[,1] - x2)),2]
@@ -463,7 +468,6 @@ structure(function(# Plot ESR spectra and peak finding
       } else {
         text(x = max(amplitudes), y = max(c(y1,y2)), labels = amp, pos = 3, , cex = 0.8)  
       }
-    
     }
     
     # background of the plot region
