@@ -9,19 +9,24 @@ structure(function(# Plot ESR spectra and peak finding
   ## Christoph Burow, University of Cologne (Germany)
   
   ##section<<
-  ## version 0.2 [2014-03-06]
+  ## version 0.3 [2014-08-29]
   # ===========================================================================
   
   input.data,
   ### \code{\link{data.frame}} (\bold{required}): data frame with two columns
   ### for x=magnetic.field or g.value, y=ESR.intensity.
   difference = FALSE,
-  ### \code{\link{logical}} (with default): plot difference of the spectrum 
+  ### \code{\link{logical}} (with default): plot first derivative of the spectrum
+  integrate = FALSE,
+  ### \code{\link{logical}} (with default): plot integrand of the spectrum
   smooth.spline = FALSE,
   ### \code{\link{logical}} (with default): fit a cubic smoothing spline to 
   ### supplied spectrum.
   smooth.spline.df,
   ### \code{\link{integer}}: desired number of degrees of freedom
+  smooth.spline.diff.df,
+  ### \code{\link{integer}}: desired number of degrees of freedom for splines of
+  ### the first derivative
   overlay = TRUE,
   ### \code{\link{logical}} (with default): overlay actual data and smoothing 
   ### spline curve in one plot.
@@ -50,14 +55,15 @@ structure(function(# Plot ESR spectra and peak finding
   ### \code{\link{logical}} (with default): define area for the plot to be zoomed
   ### in to allow for a more precise manual peak picking (\code{TRUE/FALSE}).
   ### Applies only when \code{manual.peaks = TRUE}.
-  info, 
+  info = NULL, 
   ### \code{\link{character}}: add information on experimental details as subtitle 
   output.console = TRUE,
   ### \code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).
-  ### (\code{TRUE/FALSE}).
   output.plot = TRUE,
   ### \code{\link{logical}} (with default): show plot (\code{TRUE/FALSE}).
-  ### (\code{TRUE/FALSE}).
+  add = FALSE, 
+  ### \code{\link{logical}} (with default): whether derivatives and/or integrands
+  ### are added to the spectrum or are shown separately (\code{TRUE/FALSE}).
   ...
   ### Further plot arguments to pass.
   
@@ -106,24 +112,69 @@ structure(function(# Plot ESR spectra and peak finding
   if(difference == TRUE) {
     temp<- lapply(input.data, function(x) {diff(x[,2]) })
     
+    deriv_one<- list()
+      
     for(i in 1:length(input.data)) {
-      input.data[[i]]<- as.data.frame(
+      deriv_one[[i]]<- as.data.frame(
         cbind(
           input.data[[i]][1:length(input.data[[i]][,1])-1,1],
           temp[[i]]
         )
       )
     }
+    deriv_one<- lapply(deriv_one, function (x) { colnames(x)<- c("x","y"); x })
   }
   
   #label input.data data frame for easier addressing
-  input.data<- lapply(input.data, function (x) { colnames(x)<- c("x","y"); x })
+ input.data<- lapply(input.data, function (x) { colnames(x)<- c("x","y"); x })
   
-  # check for experimental information
-  if(missing(info) == TRUE) {
-    info<- NULL
+ 
+  ##==========================================================================##
+  ## INTEGRAL
+  ##==========================================================================##
+ 
+  if(integrate == TRUE || auto.shift == TRUE) {
+    
+    temp<- lapply(input.data, function(x) { 
+      
+       t1<- as.numeric(x[,2])
+       t2<- x[,2]
+       for(i in 1:length(t1)) {
+         
+         t1[i]<- sum(t2[1:i])
+       }
+       return(t1)
+      })
+    
+    integrand<- list()
+    
+    for(i in 1:length(input.data)) {
+      integrand[[i]]<- as.data.frame(
+        cbind(
+          input.data[[i]][1:length(input.data[[i]][,1]),1],
+          temp[[i]]
+        )
+      )
+    }
+    
+    integrand<- lapply(integrand, function (x) { colnames(x)<- c("x","y"); x })
   }
   
+  ##==========================================================================##
+  ## SPLINE DIFFERENCE
+  ##==========================================================================##
+   
+   if(smooth.spline == TRUE && difference == TRUE) {
+
+    if(missing(smooth.spline.diff.df) == TRUE) {
+      smooth.spline.diff.df<- smooth.spline(deriv_one[[1]])$df  
+    } else {
+      smooth.spline.diff.df<- smooth.spline.diff.df
+    }
+      
+    deriv_one.spline<- lapply(deriv_one, function(x) { smooth.spline(x, df = smooth.spline.diff.df) })
+   
+   }
   
   ##==========================================================================##
   ## CHECK ... ARGUMENTS
@@ -134,8 +185,21 @@ structure(function(# Plot ESR spectra and peak finding
   if("ylim" %in% names(extraArgs)) {
     ylim <- extraArgs$ylim
   } else {
-    ymin<- min(unlist((lapply(input.data, function(x) { min(x[2])}))))
-    ymax<- max(unlist((lapply(input.data, function(x) { max(x[2])}))))
+    
+    if(difference == TRUE && add == FALSE) {
+      if(smooth.spline == FALSE || overlay == TRUE) {
+          ylim.data<- deriv_one
+        } else {
+          ylim.data<- lapply(deriv_one.spline, function(x) { data.frame(x = x[1], y=x[2]) })
+        }
+    } else {
+      ylim.data<- input.data
+    }
+    
+    ymin<- min(unlist((lapply(ylim.data, function(x) { min(x[2])}))))
+    ymax<- max(unlist((lapply(ylim.data, function(x) { max(x[2])}))))
+    
+    
     ymax<- ymax*1.2
     if(ymin<0) { 
       ymin<- ymin*1.2
@@ -248,8 +312,16 @@ structure(function(# Plot ESR spectra and peak finding
   
   if(auto.shift == TRUE && (length(input.data)>1) == TRUE) {
     
+    # DEPRECATED - shift spectra by maximum peak in smoothing splines
+#     pos.peak.max<- unlist(
+#       lapply(spline, function(x) {
+#         x[[1]][which.max(x[[2]])]
+#       })
+#     )
+    
+    # shift peaks by maximum peak of integrand
     pos.peak.max<- unlist(
-      lapply(spline, function(x) {
+      lapply(integrand, function(x) {
         x[[1]][which.max(x[[2]])]
       })
     )
@@ -261,8 +333,18 @@ structure(function(# Plot ESR spectra and peak finding
       # shift real data
       input.data[[i]][,1]<- input.data[[i]][,1]+diff.peak.max[i] 
       
+      if(smooth.spline == TRUE) {
       # shift splines
       spline[[i]][[1]]<- spline[[i]][[1]]+diff.peak.max[i]
+      }
+      
+      # shift integrand
+      integrand[[i]][[1]]<- integrand[[i]][[1]]+diff.peak.max[i]
+      
+      if(difference == TRUE) {
+      # shift spline of derivative
+      deriv_one.spline[[i]][[1]]<- deriv_one.spline[[i]][[1]]+diff.peak.max[i]
+      }
       
     }
   }
@@ -388,8 +470,6 @@ structure(function(# Plot ESR spectra and peak finding
       par(cex = cex, xaxs = "i", yaxs = "i", mar = c(4, 4, 7, 2)+0.2) 
     }
 
-    
-    
     # create empty plot
     plot(NA, NA,
          ylim=ylim,
@@ -485,29 +565,97 @@ structure(function(# Plot ESR spectra and peak finding
         col<- colororder
       }
       
+     
+      
       if(smooth.spline == TRUE) {
+        
+        if(add == TRUE) {
         lines(spline[[i]],
               col = col[i], 
               lwd = lwd, 
               lty = lty, 
               type = type, 
               pch = pch)
+        }
+        
         
         if(overlay == TRUE) {
+          
+          if(add == TRUE) {
+          # add original data
           lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
                 col = adjustcolor(col = col[i], alpha.f = 0.33), 
                 lwd = lwd, 
                 lty = lty, 
                 type = type,
                 pch = pch)
+          }
+          
+          # add first derivative
+          if(difference == TRUE) {
+            lines(deriv_one[[i]],
+                  col = adjustcolor(col = col[i], alpha.f = 0.33), 
+                  lwd = lwd, 
+                  lty = lty, 
+                  type = type, 
+                  pch = pch)
+            
+            lines(deriv_one.spline[[i]],
+                  col = col[i], 
+                  lwd = lwd, 
+                  lty = lty, 
+                  type = type, 
+                  pch = pch)
+          }
+        } else {
+          if(difference == TRUE) {
+            lines(deriv_one.spline[[i]],
+                  col = col[i], 
+                  lwd = lwd, 
+                  lty = lty, 
+                  type = type, 
+                  pch = pch)
+          }
         }
       } else {
+        
+        # add first derivative
+        if(difference == TRUE) {
+          lines(deriv_one[[i]],
+                col = col[i], 
+                lwd = lwd, 
+                lty = lty, 
+                type = type, 
+                pch = pch)
+        }
+        
+        if(add == TRUE || difference == FALSE) {
         lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
-              col = col[i], 
+              col = if(difference == FALSE) { col[i] }else{ adjustcolor(col = col[i], alpha.f = 0.33) }, 
               lwd = lwd, 
               lty = lty, 
               type = type,
               pch = pch)
+        }
+      }
+ 
+      
+    }
+    
+    if(integrate == TRUE) {
+      
+      y<- max(unlist(lapply(integrand, function(x) { max(x[2]) })))
+      
+      for(i in 1:length(integrand)) {
+        par(new = TRUE)
+        plot(NA, bty ="n", xaxt ="n", yaxt="n", xlab="",ylab="", ylim = c(-y, y), xlim = xlim)
+        lines(integrand[[i]],
+              col = col[i], 
+              lwd = lwd, 
+              lty = lty, 
+              type = type, 
+              pch = pch)
+        if(i == 1) { axis(4) }
       }
     }
     
@@ -648,7 +796,15 @@ structure(function(# Plot ESR spectra and peak finding
     man.peaks<- NULL
   }
   if(smooth.spline == FALSE) {
-    spline<- NULL    
+    spline<- NULL
+    deriv_one.spline<- NULL
+  }
+  if(integrate == FALSE && auto.shift == FALSE) {
+    integrand<- NULL
+  }
+  if(difference == FALSE) {
+    deriv_one<- NULL
+    deriv_one.spline<- NULL
   }
   
   if(manual.peaks == TRUE  && length(input.data) == 1) {
@@ -658,12 +814,23 @@ structure(function(# Plot ESR spectra and peak finding
                            peak2_intensity = input.data[[1]]$y[2],
                            amplitude = amplitude)
   }
+
+  # plot calculus data
+  
+  plot.par<- list(ylim = ylim,
+              xlim = xlim,
+              ylim.integrand = if(integrate==TRUE){c(-y,y)}else{NULL}
+              )
   
   # return output data.frame and nls.object fit
   invisible(list(data = input.data,
+                 derivative = deriv_one,
+                 integrand = integrand,
                  splines = spline,
+                 diff.splines = deriv_one.spline,
                  auto.peaks = all.peaks,
-                 manual.peaks = manual.peaks))
+                 manual.peaks = manual.peaks,
+                 plot.par = plot.par))
   ### Returns terminal output and a plot. In addition, a list is returned 
   ### containing the following elements:
   ###

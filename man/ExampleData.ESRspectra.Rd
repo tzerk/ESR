@@ -21,6 +21,6 @@ In progress
 In progress
 }
 \examples{
-data(ExampleData.ESRspectra)
+data(ExampleData.ESRspectra, envir = environment())
 }
 \keyword{datasets}

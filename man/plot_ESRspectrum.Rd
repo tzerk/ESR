@@ -4,18 +4,22 @@
 \description{Function to plot an ESR spectrum and finding peaks using an automated
 routine. Peaks can also be picked manually to calculate
 the amplitude in intensity.}
-\usage{plot_ESRspectrum(input.data, difference = FALSE, smooth.spline = FALSE, 
-    smooth.spline.df, overlay = TRUE, auto.shift = FALSE, find.peaks = FALSE, 
-    peak.range, peak.threshold = 10, peak.information = FALSE, 
-    manual.peaks = FALSE, manual.peaks.roi = FALSE, info, output.console = TRUE, 
-    output.plot = TRUE, ...)}
+\usage{plot_ESRspectrum(input.data, difference = FALSE, integrate = FALSE, 
+    smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, 
+    overlay = TRUE, auto.shift = FALSE, find.peaks = FALSE, peak.range, 
+    peak.threshold = 10, peak.information = FALSE, manual.peaks = FALSE, 
+    manual.peaks.roi = FALSE, info = NULL, output.console = TRUE, 
+    output.plot = TRUE, add = FALSE, ...)}
 \arguments{
   \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame with two columns
 for x=magnetic.field or g.value, y=ESR.intensity.}
-  \item{difference}{\code{\link{logical}} (with default): plot difference of the spectrum }
+  \item{difference}{\code{\link{logical}} (with default): plot first derivative of the spectrum}
+  \item{integrate}{\code{\link{logical}} (with default): plot integrand of the spectrum}
   \item{smooth.spline}{\code{\link{logical}} (with default): fit a cubic smoothing spline to 
 supplied spectrum.}
   \item{smooth.spline.df}{\code{\link{integer}}: desired number of degrees of freedom}
+  \item{smooth.spline.diff.df}{\code{\link{integer}}: desired number of degrees of freedom for splines of
+the first derivative}
   \item{overlay}{\code{\link{logical}} (with default): overlay actual data and smoothing 
 spline curve in one plot.}
   \item{auto.shift}{\code{\link{logical}} (with default): automatically shift multiple
@@ -37,10 +41,10 @@ to be used for amplitude calculation (\code{TRUE/FALSE}).}
 in to allow for a more precise manual peak picking (\code{TRUE/FALSE}).
 Applies only when \code{manual.peaks = TRUE}.}
   \item{info}{\code{\link{character}}: add information on experimental details as subtitle }
-  \item{output.console}{\code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).
-(\code{TRUE/FALSE}).}
-  \item{output.plot}{\code{\link{logical}} (with default): show plot (\code{TRUE/FALSE}).
-(\code{TRUE/FALSE}).}
+  \item{output.console}{\code{\link{logical}} (with default): print output (\code{TRUE/FALSE}).}
+  \item{output.plot}{\code{\link{logical}} (with default): show plot (\code{TRUE/FALSE}).}
+  \item{add}{\code{\link{logical}} (with default): whether derivatives and/or integrands
+are added to the spectrum or are shown separately (\code{TRUE/FALSE}).}
   \item{\dots}{Further plot arguments to pass.}
 }
 \details{\bold{Status} \cr\cr

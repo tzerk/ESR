@@ -25,6 +25,6 @@ Just a synthetic data set.
 ##
 }
 \examples{
-data(ExampleData.De)
+data(ExampleData.De, envir = environment())
 }
 \keyword{datasets}

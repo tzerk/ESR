@@ -121,12 +121,12 @@ structure(function(# Read in multiple associated ESR spectra
   ## The function should be used to read in a series of associated ESR spectrum
   ## files. A list with all spectrum data is returned, which can be passed to
   ## \code{plot_ESRspectrum} for plotting the spectra. \cr\cr
-  ## \bold{Compressed zip archives}
+  ## \bold{Compressed zip archives} \cr
   ## For \code{folder} a zip archive can be provided. The file has to have
   ## a .zip file extension and must contain all spectrum files in no subfolder.
   
   ##seealso<<
-  ## \code{\link{read.table}}
+  ## \code{\link{read.table}}, \code{\link{unzip}}, \code{\link{unz}}
   
   ##references<<
   ## In progress

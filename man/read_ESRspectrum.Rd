@@ -19,7 +19,7 @@ or carriage returns.}
 The function should be used to read in a series of associated ESR spectrum
 files. A list with all spectrum data is returned, which can be passed to
 \code{plot_ESRspectrum} for plotting the spectra. \cr\cr
-\bold{Compressed zip archives}
+\bold{Compressed zip archives} \cr
 For \code{folder} a zip archive can be provided. The file has to have
 a .zip file extension and must contain all spectrum files in no subfolder.}
 \value{Returns a terminal output. In addition an 
@@ -34,7 +34,7 @@ Who wrote it}
 \note{# }
 
 
-\seealso{\code{\link{read.table}}}
+\seealso{\code{\link{read.table}}, \code{\link{unzip}}, \code{\link{unz}}}
 \examples{
 ##no example
 }
