@@ -354,14 +354,25 @@ structure(function(# Plot ESR spectra and peak finding
   ##==========================================================================##
   
   if(find.peaks == TRUE && length(input.data) == 1) {
+   
     
     if(missing(peak.range) == TRUE) {
       peak.range<- c(min(input.data[[1]][,1]), max(input.data[[1]][,1]))
     }
     
+    
+    input.temp<- input.data
+    
     if(smooth.spline == TRUE) {
-      input.temp<- input.data
-      input.data[[1]][,2]<- spline[[1]]$y
+      if(difference == TRUE) {
+        input.data[[1]][1:1023,2]<- deriv_one.spline[[1]]$y
+      } else {
+        input.data[[1]][,2]<- spline[[1]]$y
+      }
+    } else {
+      if(difference == TRUE) {
+        input.data[[1]]<- deriv_one[[1]]
+      }
     }
     
     ##Preparation
@@ -419,9 +430,7 @@ structure(function(# Plot ESR spectra and peak finding
     all.peaks<- all.peaks[order(all.peaks[,1]),]
     colnames(all.peaks)<- c("magnetic.field","ESR.intensity")
     
-    if(smooth.spline == TRUE) {
-      input.data<- input.temp
-    }
+    input.data<- input.temp
   }
   
   ##==========================================================================##
@@ -558,106 +567,55 @@ structure(function(# Plot ESR spectra and peak finding
       grid(col = "white", lwd = 1, lty = 1)
     }
     
+    
+    plot_line<- function(data, color, id) {
+      
+      if(overlay == TRUE && smooth.spline == TRUE) {
+       if(id == "input.data" || id == "deriv") {
+         color<- adjustcolor(color, alpha.f = 0.33)
+       } 
+      }
+      
+      if(add == TRUE) {
+        
+      }
+      
+      lines(data,
+            col = color, 
+            lwd = lwd, 
+            lty = lty, 
+            type = type, 
+            pch = pch)
+    }##EndOf::plot_line()
+    
+    if(length(input.data) > 1) {
+      col<- colororder
+    }
+    
     # add sprectum lines (either measured data or splines)
     for(i in 1:length(input.data)) {
       
-      if(length(input.data) > 1) {
-        col<- colororder
+      # INPUT DATA
+      if(add == TRUE || c(smooth.spline == FALSE && difference == FALSE)) {
+        plot_line(cbind(input.data[[i]]$x, input.data[[i]]$y), col[i], "input.data") 
       }
       
-     
+      # SPLINE
+      if(c(smooth.spline == TRUE && difference == FALSE) || c(smooth.spline==TRUE && difference == TRUE && add == TRUE && overlay == TRUE)) {
+        plot_line(spline[[i]], col[i], "spline")
+      }
       
-      if(smooth.spline == TRUE) {
-        
-        if(add == TRUE) {
-        lines(spline[[i]],
-              col = col[i], 
-              lwd = lwd, 
-              lty = lty, 
-              type = type, 
-              pch = pch)
-        }
-        
-        
-        if(overlay == TRUE) {
+      # DERIVATIVE
+      if(difference == TRUE && c(smooth.spline==FALSE || c(smooth.spline==TRUE && overlay == TRUE))) { 
+        plot_line(deriv_one[[i]], col[i], "deriv") 
+      }
+      
+      # DERIVATIVE SPLINE
+      if(difference == TRUE && smooth.spline == TRUE) { 
+        plot_line(deriv_one.spline[[i]], col[i], "deriv.spline") 
+      }
           
-          if(add == TRUE) {
-          # add original data
-          lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
-                col = adjustcolor(col = col[i], alpha.f = 0.33), 
-                lwd = lwd, 
-                lty = lty, 
-                type = type,
-                pch = pch)
-          }
-          
-          # add first derivative
-          if(difference == TRUE) {
-            lines(deriv_one[[i]],
-                  col = adjustcolor(col = col[i], alpha.f = 0.33), 
-                  lwd = lwd, 
-                  lty = lty, 
-                  type = type, 
-                  pch = pch)
-            
-            lines(deriv_one.spline[[i]],
-                  col = col[i], 
-                  lwd = lwd, 
-                  lty = lty, 
-                  type = type, 
-                  pch = pch)
-          }
-        } else {
-          if(difference == TRUE) {
-            lines(deriv_one.spline[[i]],
-                  col = col[i], 
-                  lwd = lwd, 
-                  lty = lty, 
-                  type = type, 
-                  pch = pch)
-          }
-        }
-      } else {
-        
-        # add first derivative
-        if(difference == TRUE) {
-          lines(deriv_one[[i]],
-                col = col[i], 
-                lwd = lwd, 
-                lty = lty, 
-                type = type, 
-                pch = pch)
-        }
-        
-        if(add == TRUE || difference == FALSE) {
-        lines(x = input.data[[i]]$x, y = input.data[[i]]$y, 
-              col = if(difference == FALSE) { col[i] }else{ adjustcolor(col = col[i], alpha.f = 0.33) }, 
-              lwd = lwd, 
-              lty = lty, 
-              type = type,
-              pch = pch)
-        }
-      }
- 
-      
-    }
-    
-    if(integrate == TRUE) {
-      
-      y<- max(unlist(lapply(integrand, function(x) { max(x[2]) })))
-      
-      for(i in 1:length(integrand)) {
-        par(new = TRUE)
-        plot(NA, bty ="n", xaxt ="n", yaxt="n", xlab="",ylab="", ylim = c(-y, y), xlim = xlim)
-        lines(integrand[[i]],
-              col = col[i], 
-              lwd = lwd, 
-              lty = lty, 
-              type = type, 
-              pch = pch)
-        if(i == 1) { axis(4) }
-      }
-    }
+    }##EndOf::Loop
     
     # add legend
     if(length(input.data) > 1 && legend == TRUE) { 
@@ -691,6 +649,27 @@ structure(function(# Plot ESR spectra and peak finding
         }
       }
       temp.plot<- recordPlot()
+    }
+    
+    ##==========================================================================##
+    ## ADD INTEGRAND TO PLOT
+    ##==========================================================================##
+  
+    if(integrate == TRUE) {
+      
+      y<- max(unlist(lapply(integrand, function(x) { max(x[2]) })))
+      
+      for(i in 1:length(integrand)) {
+        par(new = TRUE)
+        plot(NA, bty ="n", xaxt ="n", yaxt="n", xlab="",ylab="", ylim = c(-y, y), xlim = xlim)
+        lines(integrand[[i]],
+              col = col[i], 
+              lwd = lwd, 
+              lty = lty, 
+              type = type, 
+              pch = pch)
+        if(i == 1) { axis(4) }
+      }
     }
     
     ##==========================================================================##
@@ -816,11 +795,10 @@ structure(function(# Plot ESR spectra and peak finding
   }
 
   # plot calculus data
-  
-  plot.par<- list(ylim = ylim,
-              xlim = xlim,
-              ylim.integrand = if(integrate==TRUE){c(-y,y)}else{NULL}
-              )
+    plot.par<- list(ylim = ylim,
+                  xlim = xlim,
+                  ylim.integrand = if(integrate==TRUE){c(-y,y)}else{NULL}
+  )
   
   # return output data.frame and nls.object fit
   invisible(list(data = input.data,
