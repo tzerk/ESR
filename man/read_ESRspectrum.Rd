@@ -4,23 +4,14 @@
 \alias{read_ESRspectrum}
 \title{Read in multiple associated ESR spectra}
 \usage{
-read_ESRspectrum(folder, file.ext = "txt", header = TRUE, sep = "")
+read_ESRspectrum(file, ...)
 }
 \arguments{
-\item{folder}{\code{\link{character}} (required): directory where the
+\item{file}{\code{\link{character}} (required): directory where the
 spectra files are stored. Alternatively, a compressed zip file can be
 provided. See details!}
 
-\item{file.ext}{\code{\link{character}}: import only files with a certain
-extension}
-
-\item{header}{\code{\link{logical}}: value indicating whether the file
-contains the names of the variables as its first line.}
-
-\item{sep}{\code{\link{character}}: the field separator character. Values on
-each line of the file are separated by this character. If sep = '' (the
-default for read.table) the separator is 'white space', that is one or more
-spaces, tabs, newlines or carriage returns.}
+\item{...}{further arguments}
 }
 \value{
 Returns a terminal output. In addition an
@@ -35,14 +26,32 @@ This is a wrapper function for \code{read.table}. The function should be
 used to read in a series of associated ESR spectrum files. A list with all
 spectrum data is returned, which can be passed to \code{plot_ESRspectrum}
 for plotting the spectra. \cr\cr \bold{Compressed zip archives} \cr For
-\code{folder} a zip archive can be provided. The file has to have a .zip
-file extension and must contain all spectrum files in no subfolder.
+\code{file} a zip archive can be provided. The file has to have a .zip
+file extension and must contain all spectrum files in no subfile.
 }
 \note{
 #
 }
 \examples{
-##no example
+# Import ASCII text file
+file <- system.file("extdata", "coral.txt", package = "ESR")
+spec1 <- read_ESRspectrum(file)
+
+# Import .zip archive
+file <- system.file("extdata", "mollusc.zip", package = "ESR")
+spec2 <- read_ESR(file)
+
+# Import Bruker ESP300-E raw binary spectrum
+file <- system.file("extdata", "mollusc.SPC", package = "ESR")
+spec3 <- read_ESRspectrum(file)
+
+#' # Import Bruker ELEXSYS500 spectrum (ASCII)
+file <- system.file("extdata", "quartz.ASC", package = "ESR")
+spec3 <- read_ESRspectrum(file)
+
+#' # Import Bruker ELEXSYS500 raw binary spectrum
+file <- system.file("extdata", "quartz.DTA", package = "ESR")
+spec3 <- read_ESRspectrum(file)
 }
 \author{
 Christoph Burow, University of Cologne (Germany) Who wrote it
