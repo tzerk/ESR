@@ -13,7 +13,7 @@
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
-#' @import Luminescence boot
+#' @import Luminescence boot R6
 NULL
 
 
@@ -37,7 +37,7 @@ NULL
 #' 
 #' data(ExampleData.De, envir = environment())
 #' 
-NULL
+"ExampleData.De"
 
 
 #' ESR spectra of a mollusc and the dpph standard
@@ -58,7 +58,7 @@ NULL
 #' 
 #' data(ExampleData.ESRspectra, envir = environment())
 #' 
-NULL
+"ExampleData.ESRspectra"
 
 
 
