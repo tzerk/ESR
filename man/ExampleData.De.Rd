@@ -9,6 +9,9 @@
 \source{
 ##
 }
+\usage{
+ExampleData.De
+}
 \description{
 Synthetic ESR equivalent dose data set
 }
