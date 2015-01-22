@@ -1,6 +1,3 @@
-#' @export
-NULL
-
 ESR <- R6Class("ESR",
                public = list(
                  originator = NA,
@@ -14,14 +11,15 @@ ESR <- R6Class("ESR",
                      self$data <- data
                    else 
                      self$data <- setnames(data.frame(matrix(ncol = 2, nrow = 1024)), c("x","y"))
-                   
-                   
                  },
                  set_origin = function(s) {
                    self$originator <- s
                  },
                  set_data = function(x) {
-                   self$data <- x
+                   if (!is.null(x) && ncol(x)==2)
+                     self$data <- setnames(x, c("x","y"))
+                   else
+                     message("Invalid data format! Data was not saved.")
                  }
                )
 )
@@ -29,9 +27,13 @@ ESR <- R6Class("ESR",
 ESR.Spectrum <- R6Class("ESR.Spectrum",
                         inherit = ESR,
                         public = list(
+                          parameter = NA,
                           typeof = "Spectrum",
                           initialize = function() {
                             super$initialize(originator = "ESR.Spectrum$new()")
+                          },
+                          set_par = function(p) {
+                            self$parameter <- p
                           }
-                          )
                         )
+)
