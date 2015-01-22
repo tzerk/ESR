@@ -34,27 +34,31 @@ file extension and must contain all spectrum files in no subfile.
 }
 \examples{
 # Import ASCII text file
-file <- system.file("extdata", "coral.txt", package = "ESR")
-spec1 <- read_ESRspectrum(file)
+file1 <- system.file("extdata", "coral.txt", package = "ESR")
+spec1 <- read_ESRspectrum(file1)
 
 # Import .zip archive
-file <- system.file("extdata", "mollusc.zip", package = "ESR")
-spec2 <- read_ESR(file)
+file2 <- system.file("extdata", "mollusc.zip", package = "ESR")
+spec2 <- read_ESRspectrum(file2)
 
 # Import Bruker ESP300-E raw binary spectrum
-file <- system.file("extdata", "mollusc.SPC", package = "ESR")
-spec3 <- read_ESRspectrum(file)
+file3 <- system.file("extdata", "mollusc.SPC", package = "ESR")
+spec3 <- read_ESRspectrum(file3)
 
-#' # Import Bruker ELEXSYS500 spectrum (ASCII)
-file <- system.file("extdata", "quartz.ASC", package = "ESR")
-spec3 <- read_ESRspectrum(file)
+# Import Bruker ELEXSYS500 spectrum (ASCII)
+file4 <- system.file("extdata", "dpph.ASC", package = "ESR")
+spec4 <- read_ESRspectrum(file4)
 
-#' # Import Bruker ELEXSYS500 raw binary spectrum
-file <- system.file("extdata", "quartz.DTA", package = "ESR")
-spec3 <- read_ESRspectrum(file)
+# Import Bruker ELEXSYS500 raw binary spectrum
+file5 <- system.file("extdata", "quartz.DTA", package = "ESR")
+spec5 <- read_ESRspectrum(file5)
+
+# Import all example data sets at once by providing only the directory
+dir <- system.file("extdata", package = "ESR")
+specs <- read_ESRspectrum(dir)
 }
 \author{
-Christoph Burow, University of Cologne (Germany) Who wrote it
+Christoph Burow, University of Cologne (Germany)
 }
 \references{
 In progress

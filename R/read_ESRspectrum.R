@@ -18,54 +18,180 @@
 #' should be accessed using the function \code{\link{get_RLum.Results}}
 #' @export
 #' @note #
-#' @author Christoph Burow, University of Cologne (Germany) Who wrote it
+#' @author Christoph Burow, University of Cologne (Germany)
 #' @seealso \code{\link{read.table}}, \code{\link{unzip}}, \code{\link{unz}}
 #' @references In progress
 #' @examples
 #' 
 #' # Import ASCII text file
 #' file1 <- system.file("extdata", "coral.txt", package = "ESR")
-#' spec1 <- read_ESRspectrum(file)
+#' spec1 <- read_ESRspectrum(file1)
 #' 
 #' # Import .zip archive
 #' file2 <- system.file("extdata", "mollusc.zip", package = "ESR") 
-#' spec2 <- read_ESR(file)
+#' spec2 <- read_ESRspectrum(file2)
 #' 
 #' # Import Bruker ESP300-E raw binary spectrum
 #' file3 <- system.file("extdata", "mollusc.SPC", package = "ESR")
-#' spec3 <- read_ESRspectrum(file)
+#' spec3 <- read_ESRspectrum(file3)
 #' 
-#' #' # Import Bruker ELEXSYS500 spectrum (ASCII)
-#' file4 <- system.file("extdata", "quartz.ASC", package = "ESR")
-#' spec4 <- read_ESRspectrum(file)
+#' # Import Bruker ELEXSYS500 spectrum (ASCII)
+#' file4 <- system.file("extdata", "dpph.ASC", package = "ESR")
+#' spec4 <- read_ESRspectrum(file4)
 #' 
-#' #' # Import Bruker ELEXSYS500 raw binary spectrum
+#' # Import Bruker ELEXSYS500 raw binary spectrum
 #' file5 <- system.file("extdata", "quartz.DTA", package = "ESR")
-#' spec5 <- read_ESRspectrum(file)
+#' spec5 <- read_ESRspectrum(file5)
+#' 
+#' # Import all example data sets at once by providing only the directory
+#' dir <- system.file("extdata", package = "ESR")
+#' specs <- read_ESRspectrum(dir)
 #' 
 #' @export read_ESRspectrum
 read_ESRspectrum <- function(file, ...) {
   
   ## FUNCTIONS ----
   check_type <- function(f) {
-    valid_ext <- c("txt", "zip", "asc", "spc")
-    ext <- substr(f, nchar(f)-2, nchar(f))
+    valid_ext <- c("txt", "zip", "asc", "spc", "dta")
+    ext <- substr(tolower(f), nchar(f)-2, nchar(f))
     val <- match(ext, valid_ext)
-
-    if (is.na(val)) stop(paste("Invalid file extension:", ext))
+    
+    if (is.na(val)) {
+      file_list <- list.files(f, paste0(valid_ext, collapse = "|"), ignore.case = TRUE)
+      if (length(file_list) == 0) {
+        stop(paste("Invalid file extension:", ext))
+      }
+      ext <- list(file_list)
+    }
     return(ext)
   }
   
+  get_xval <- function(par, cf, sw, div = 1) {
+    if (!is.null(par)) {
+      center_field <- as.numeric(par[par==cf, 2])
+      sweep_width <- as.numeric(par[par==sw, 2]) / div
+      start <- center_field - sweep_width
+      end <- center_field + sweep_width
+      
+      xval <- seq(from = start, to = end, by = (end-start)/1023)
+    } else {
+      xval <- seq(1, 1024, 1)
+    }
+  }
   
+  read_data <- function(f, type, ...) {
+    if (type == "txt") {
+      df <- fread(f, stringsAsFactors = FALSE)
+      if (ncol(df) == 3) set(df, j = 1L, value = NULL)
+      par <- NULL
+    }#EndOf::txt
+    
+    if (type == "asc") {
+      df <- as.data.table(read.csv(f, sep = ""))
+      if (ncol(df) != 2) set(df, j = c(1L, 4L, 5L), value = NULL)
+      par <- NULL
+    }#EndOf::asc
+    
+    if (type == "zip") {
+      df <- NULL
+      par <- NULL
+      message(".zip files are currently not supported")
+    }#EndOf::zip
+    
+    if (type == "spc") {
+      df <- as.data.table(readBin(f, "int", n = 1024L, endian = "big", size = 4))
+      
+      par <- tryCatch(
+        read.table(gsub(".spc", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),
+        error = function(e) { NULL },
+        warning = function(w) { NULL }
+      )
+      xval <- get_xval(par, "HCF", "HSW")
+      
+      df <- cbind(xval, df)
+    }#EndOf::spc
+    
+    if (type == "dta") {
+      df <- as.data.table(readBin(f, "numeric", n = 1024L, endian = "big", size = 8))
+      
+      par <- tryCatch({
+        f2 <- gsub(".dta", ".dsc", f, ignore.case = TRUE)
+        x <- readLines(f2)
+        x <- gsub("\\*", "", x)  # delete all * symbols
+        x <- gsub(".DVC", "", x)
+        x <- x[x != ""]  # remove all empty strings
+        x <- gsub("[,|\t|']", " ", x)
+        x <- gsub(" +", " ", x)
+        
+        y <- lapply(x, function(s) unlist(strsplit(s, " +")))
+        
+        for (i in seq_along(y)) {
+          y[[i]] <- y[[i]][y[[i]] != ""]
+          
+          if (length(y[[i]]) == 3L) {
+            y[[i]][1] <- paste0(y[[i]][1], " (", y[[i]][3], ")")
+            y[[i]] <- y[[i]][1:2]
+          }
+          
+          if (length(y[[i]]) > 2L) {
+            y[[i]] <- NA
+          }
+        }
+        y <- y[!is.na(y)]
+        df2 <- data.frame(matrix(nrow = length(y), ncol = 2))
+        for (i in seq_along(y)) {
+          df2[i, ] <- y[[i]]
+        }
+        df2 <- df2[-which(df2=="Item"),]
+        df2 <- df2[-which(df2=="Documentational"),]
+      },
+      error = function(e) { NULL },
+      warning = function(w) { NULL }
+      )
+      
+      xval <- get_xval(par, "CenterField (G)", "SweepWidth (G)", 2)
+      
+      df <- cbind(xval, df)
+      
+    }#EndOf::dta
+    
+    return(list(df, par))
+  }
   
   ## CHECK TYPE ----
   type <- check_type(file)
   
-  print(type)
+  if (is.list(type)) {
+    last_char <- substr(file, start = nchar(file), nchar(file))
+    if (last_char != "/") file <- paste0(file, "/")
+    
+    files <- lapply(unlist(type), function(x) paste0(file, x))
+    
+    res <- lapply(files, function(x) read_data(x, substr(tolower(x), nchar(x)-2, nchar(x))))
+    
+    obj <- vector("list", length = length(res))
+    
+    for (i in seq_along(obj)) {
+      obj[[i]] <- ESR.Spectrum$new()
+      obj[[i]]$set_data(res[[i]][[1]])
+      obj[[i]]$set_par(res[[i]][[2]])
+    }
+    
+  }
+  
+  if (!is.list(type)) {
+    df <- read_data(file, type)
+    names(df) <- c("data", "par")
+    
+    obj <- ESR.Spectrum$new()
+    obj$set_data(df$data)
+    obj$set_par(df$par)
+  }
   
   ## CONSOLE ----
+  message("Job done!")
   
   ## RETURN ----
-
-  invisible()
+  
+  invisible(obj)
 }
