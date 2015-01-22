@@ -13,7 +13,7 @@
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
-#' @import Luminescence boot R6
+#' @import Luminescence boot R6 data.table shiny googleVis
 NULL
 
 
