@@ -1,54 +1,56 @@
-#' Read in multiple associated ESR spectra
+#' Read in single or multiple ESR spectra
 #' 
 #' Use this function to import a series of associated ESR spectra into R.
 #' 
 #' This is a wrapper function for \code{read.table}. The function should be
 #' used to read in a series of associated ESR spectrum files. A list with all
-#' spectrum data is returned, which can be passed to \code{plot_ESRspectrum}
-#' for plotting the spectra. \cr\cr \bold{Compressed zip archives} \cr For
-#' \code{file} a zip archive can be provided. The file has to have a .zip
-#' file extension and must contain all spectrum files in no subfile.
+#' spectrum data is returned, which can be passed to \code{plot_Spectrum}
+#' for plotting the spectra.
 #' 
-#' @param file \code{\link{character}} (required): directory where the
-#' spectra files are stored. Alternatively, a compressed zip file can be
-#' provided. See details!
-#' @param ... further arguments
+#' @param file \code{\link{character}} (required): file path or directory where
+#' the spectra files are stored.
+#' @param ... further arguments (e.g., \code{n} to specify the number of datapoints).
 #' @return Returns a terminal output. In addition an
-#' \code{\linkS4class{RLum.Results}} object is returned. \cr\cr The output
-#' should be accessed using the function \code{\link{get_RLum.Results}}
+#' \code{\link{R6Class}} object is returned. \cr
 #' @export
 #' @note #
 #' @author Christoph Burow, University of Cologne (Germany)
-#' @seealso \code{\link{read.table}}, \code{\link{unzip}}, \code{\link{unz}}
+#' @seealso \code{\link{read.table}}, \code{\link{readBin}}, \code{\link{read.csv}}
 #' @references In progress
 #' @examples
 #' 
 #' # Import ASCII text file
 #' file1 <- system.file("extdata", "coral.txt", package = "ESR")
-#' spec1 <- read_ESRspectrum(file1)
+#' spec1 <- read_Spectrum(file1)
 #' 
 #' # Import .zip archive
 #' file2 <- system.file("extdata", "mollusc.zip", package = "ESR") 
-#' spec2 <- read_ESRspectrum(file2)
+#' spec2 <- read_Spectrum(file2)
 #' 
 #' # Import Bruker ESP300-E raw binary spectrum
 #' file3 <- system.file("extdata", "mollusc.SPC", package = "ESR")
-#' spec3 <- read_ESRspectrum(file3)
+#' spec3 <- read_Spectrum(file3)
 #' 
 #' # Import Bruker ELEXSYS500 spectrum (ASCII)
 #' file4 <- system.file("extdata", "dpph.ASC", package = "ESR")
-#' spec4 <- read_ESRspectrum(file4)
+#' spec4 <- read_Spectrum(file4)
 #' 
 #' # Import Bruker ELEXSYS500 raw binary spectrum
 #' file5 <- system.file("extdata", "quartz.DTA", package = "ESR")
-#' spec5 <- read_ESRspectrum(file5)
+#' spec5 <- read_Spectrum(file5)
 #' 
 #' # Import all example data sets at once by providing only the directory
 #' dir <- system.file("extdata", package = "ESR")
-#' specs <- read_ESRspectrum(dir)
+#' specs <- read_Spectrum(dir)
 #' 
-#' @export read_ESRspectrum
-read_ESRspectrum <- function(file, ...) {
+#' @export read_Spectrum
+read_Spectrum <- function(file, ...) {
+  
+  ## ... ARGS ----
+  extraArgs <- list(...)
+  verbose <- ifelse("verbose" %in% names(extraArgs), extraArgs$verbose, TRUE)
+  trace <- ifelse("trace" %in% names(extraArgs), extraArgs$trace, TRUE)
+  records <- ifelse("n" %in% names(extraArgs), extraArgs$n, 1024L)
   
   ## FUNCTIONS ----
   check_type <- function(f) {
@@ -73,9 +75,9 @@ read_ESRspectrum <- function(file, ...) {
       start <- center_field - sweep_width
       end <- center_field + sweep_width
       
-      xval <- seq(from = start, to = end, by = (end-start)/1023)
+      xval <- seq(from = start, to = end, by = (end - start) / (records - 1))
     } else {
-      xval <- seq(1, 1024, 1)
+      xval <- seq(1, records, 1)
     }
   }
   
@@ -95,11 +97,11 @@ read_ESRspectrum <- function(file, ...) {
     if (type == "zip") {
       df <- NULL
       par <- NULL
-      message(".zip files are currently not supported")
+      message(".zip files are currently not supported. The file was skipped.")
     }#EndOf::zip
     
     if (type == "spc") {
-      df <- as.data.table(readBin(f, "int", n = 1024L, endian = "big", size = 4))
+      df <- as.data.table(readBin(f, "int", n = records, endian = "big", size = 4))
       
       par <- tryCatch(
         read.table(gsub(".spc", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),
@@ -112,7 +114,7 @@ read_ESRspectrum <- function(file, ...) {
     }#EndOf::spc
     
     if (type == "dta") {
-      df <- as.data.table(readBin(f, "numeric", n = 1024L, endian = "big", size = 8))
+      df <- as.data.table(readBin(f, "numeric", n = records, endian = "big", size = 8))
       
       par <- tryCatch({
         f2 <- gsub(".dta", ".dsc", f, ignore.case = TRUE)
@@ -160,7 +162,6 @@ read_ESRspectrum <- function(file, ...) {
   
   ## CHECK TYPE ----
   type <- check_type(file)
-  
   if (is.list(type)) {
     last_char <- substr(file, start = nchar(file), nchar(file))
     if (last_char != "/") file <- paste0(file, "/")
@@ -176,7 +177,6 @@ read_ESRspectrum <- function(file, ...) {
       obj[[i]]$set_data(res[[i]][[1]])
       obj[[i]]$set_par(res[[i]][[2]])
     }
-    
   }
   
   if (!is.list(type)) {
@@ -189,7 +189,11 @@ read_ESRspectrum <- function(file, ...) {
   }
   
   ## CONSOLE ----
-  message("Job done!")
+  if (trace) {
+    message("\n The following files were imported:")
+    message(ifelse(exists("files"), paste(unlist(files), collapse = "\n"), file)) 
+  }
+  if (verbose) message("\n Job done!")
   
   ## RETURN ----
   
