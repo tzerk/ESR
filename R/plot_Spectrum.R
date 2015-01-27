@@ -69,27 +69,27 @@
 #' data(ExampleData.ESRspectra, envir = environment())
 #' 
 #' ##plot dpph and use the automatic peak finding routine
-#' plot_ESRspectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
+#' plot_Spectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
 #'                  peak.range = c(3340,3355),
 #'                  peak.threshold = 10, peak.information = TRUE,
 #'                  output.console = TRUE)
 #' 
 #' ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
-#' plot_ESRspectrum(ExampleData.ESRspectra$Ba01_00,
+#' plot_Spectrum(ExampleData.ESRspectra$Ba01_00,
 #'                  smooth.spline = TRUE,
 #'                  smooth.spline.df = 40,
 #'                  overlay = TRUE)
 #' 
 #' ##plot all ESR spectra of sample Ba01
-#' plot_ESRspectrum(ExampleData.ESRspectra$Ba01)
+#' plot_Spectrum(ExampleData.ESRspectra$Ba01)
 #' 
 #' ##plot all ESR spectra of sample Ba01 and align curves by the max peak
-#' plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+#' plot_Spectrum(ExampleData.ESRspectra$Ba01,
 #'                  auto.shift = TRUE)
 #' 
 #' ##plot all ESR spectra of sample Ba01, use smoothing splines and
 #' ##align curves by the max peak
-#' plot_ESRspectrum(ExampleData.ESRspectra$Ba01,
+#' plot_Spectrum(ExampleData.ESRspectra$Ba01,
 #'                  smooth.spline = TRUE,
 #'                  smooth.spline.df = 40,
 #'                  auto.shift = TRUE,
@@ -97,8 +97,8 @@
 #' 
 #' 
 #' 
-#' @export plot_ESRspectrum
-plot_ESRspectrum <- function(input.data, difference = FALSE, integrate = FALSE, 
+#' @export plot_Spectrum
+plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE, 
                              smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
                              auto.shift = FALSE, find.peaks = FALSE, peak.range, peak.threshold = 10, 
                              peak.information = FALSE, manual.peaks = FALSE, manual.peaks.roi = FALSE, 
