@@ -37,7 +37,7 @@ NULL
 #' 
 #' data(ExampleData.De, envir = environment())
 #' 
-"ExampleData.De"
+NULL
 
 
 #' ESR spectra of a mollusc and the dpph standard
@@ -58,7 +58,6 @@ NULL
 #' 
 #' data(ExampleData.ESRspectra, envir = environment())
 #' 
-"ExampleData.ESRspectra"
-
+NULL
 
 
