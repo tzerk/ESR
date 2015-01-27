@@ -21,13 +21,14 @@ Imports:
     googleVis
 URL: https://github.com/tzerk/ESR
 BugReports: https://github.com/tzerk/ESR/issues
-LazyData: true 
+LazyData: true
 Collate:
-    'app_ESR.R'
+    'methods.R'
     'ESR-class.R'
     'ESR-package.R'
+    'app_ESR.R'
     'calc_DePlateau.R'
     'fit_SSE.R'
-    'plot_ESRspectrum.R'
-    'read_ESRspectrum.R'
+    'plot_Spectrum.R'
+    'read_Spectrum.R'
     'zzz.R'
