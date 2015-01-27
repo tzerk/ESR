@@ -9,9 +9,6 @@ on the following 2 variables.}
 \source{
 In progress
 }
-\usage{
-ExampleData.ESRspectra
-}
 \description{
 ESR spectra of a mollusc from the foothills of the Alps and the dpph
 standard measured at 100 K
