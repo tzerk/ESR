@@ -31,7 +31,6 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                         inherit = ESR,
                         public = list(
                           parameter = NA,
-                          data.backup = NA,
                           type = "Spectrum",
                           initialize = function() {
                             super$initialize(originator = "ESR.Spectrum$new()")
@@ -39,14 +38,14 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           set_par = function(p) {
                             self$parameter <- p
                           },
-                          diff = function() {
-                            self$data.backup <- self$set_backup()
-                            self$data <- differential(self$data)
-                          }
-                        ),
-                        private = list(
-                          set_backup = function() {
-                            self$data.backup <- self$data
+                          get_diff = function(x = self$data) {
+                            invisible(differential(x))
+                          },
+                          get_integral = function(x = self$data) {
+                            invisible(integrate(x))
+                          },
+                          get_spline = function(x = self$data, ...) {
+                            invisible(s.spline(x, ...))
                           }
                         )
 )
