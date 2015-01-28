@@ -19,7 +19,7 @@ ESR <- R6Class("ESR",
                    self$originator <- s
                  },
                  set_data = function(x) {
-                   if (!is.null(x) && ncol(x)==2)
+                   if (!is.null(x) && ncol(x) == 2)
                      self$data <- setnames(x, c("x", "y"))
                    else
                      message("Invalid data format! Data was not saved.")
@@ -38,8 +38,8 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           set_par = function(p) {
                             self$parameter <- p
                           },
-                          get_diff = function(x = self$data) {
-                            invisible(differential(x))
+                          get_diff = function(x = self$data, order = 1, ...) {
+                            invisible(differential(x, order, ...))
                           },
                           get_integral = function(x = self$data) {
                             invisible(integrate(x))
