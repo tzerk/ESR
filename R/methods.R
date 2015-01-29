@@ -36,9 +36,8 @@ s.spline <- function(x, ...) {
 
 gval <- function(v, H, x) {
   # TODO: calculate g-value for all x-values in x$data
-  planck_const <- 6.62606957e-27
-  bohr_magneton <- 9.27400968e-24
-  g <- ((planck_const * v) / (bohr_magneton * H)) * 10^6
-  x <- 
+  planck_const <- 6.62606957e-34 # SI: J/s 
+  bohr_magneton <- 9.27400968e-24 # SI: J/T
+  g <- (planck_const * v * 10^9) / (bohr_magneton * 10^-4 * H)
   return(g)
 }
