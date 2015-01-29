@@ -38,6 +38,24 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           set_par = function(p) {
                             self$parameter <- p
                           },
+                          set_gvalues = function(v, H, x = self$data) {
+                            # TODO: move checks to gval() in methods.R
+                            if (missing(v) && missing(H))
+                              if (typeof(self$parameter) != "list") 
+                                return(message("No parameters available!"))
+                            
+                            if (missing(v) && "MF" %in% self$parameter[ ,1])
+                              v <- as.numeric(self$parameter[which(self$parameter[,1]=="MF"), 2])
+                            
+                            if (missing(H) && any(d$x<=2048))
+                              return(message("Invalid or no magnetic field data!"))
+                            
+                            if (missing(H))
+                              H <- self$data$x
+                            
+                            # TODO: Keep only this line here
+                            invisible(gval(v, H, x))
+                          },
                           get_diff = function(x = self$data, order = 1, ...) {
                             invisible(differential(x, order, ...))
                           },
