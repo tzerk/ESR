@@ -47,7 +47,7 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                             if (missing(v) && "MF" %in% self$parameter[ ,1])
                               v <- as.numeric(self$parameter[which(self$parameter[,1]=="MF"), 2])
                             
-                            if (missing(H) && any(d$x<=2048))
+                            if (missing(H) && any(x$x<=2048))
                               return(message("Invalid or no magnetic field data!"))
                             
                             if (missing(H))
