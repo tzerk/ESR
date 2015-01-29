@@ -1,9 +1,33 @@
 # Plot methods for R6 Classes
 plot.ESR.Spectrum <- function(x, ...) {
   if ("R6" %in% class(x)) x <- x$data
-  else class(x) <- class(x)[-1]
-  plot(x, type = "l", main = "ESR Spectrum", xlab = "Magnetic field (G)", ylab = "Intensity (a.u.)", ...)
+  else class(x) <- class(x)[which(class(x) != "ESR.Spectrum")]
+  xlim <- range(pretty(x$x))
+  if (all(x$x < 3)) {
+    xlab <- "g-factor"
+    xlim <- rev(xlim)
+  } else {
+    if (all(x$x < 2049)) {
+      xlab <- "Datapoint"
+    } else {
+      xlab <- "Magnetic Field (G)"
+    }
+  }
+  
+  plot(x, type = "l", main = "ESR Spectrum", xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ...)
+  mtext(get_mtext(attributes(x)$spectrum), cex = 0.8, line = 0.25)
+  
   class(x) <- c("ESR.Spectrum", class(x))
+}
+
+get_mtext <- function(x) {
+  str <- vector("character", length(x))
+  for (i in seq_along(x)) {
+    if (x[i] == "diff") {
+      
+    }
+  }
+  return(str)
 }
 
 # Methods for R6 Classes
@@ -14,9 +38,14 @@ differential <- function(x, order, ...) {
   for (i in seq_len(order)) {
     d <- diff(d, ...)
   }
-  dt <- data.table(x$x[1:c(length(x$x)-order)], d)
-  class(dt) <- c("ESR.Spectrum", class(dt))
-  return(dt)
+  until <- nrow(x) - order
+  c <- attributes(x)$spectrum
+  x <- x[1:until] # TODO: This causes x to loose its attributes
+  if (!is.null(c)) attr(x, "spectrum") <- c
+  x$y <- d
+  class(x) <- c("ESR.Spectrum", class(x))
+  attr(x, "spectrum") <- c(attr(x, "spectrum"), rep("diff", order))
+  return(x)
 }
 
 integrate <- function(x) {
@@ -25,19 +54,31 @@ integrate <- function(x) {
     t[i] <- sum(x$y[1:i])
   x$y <- t
   class(x) <- c("ESR.Spectrum", class(x))
+  attr(x, "spectrum") <- c(attr(x, "spectrum"), "integral")
   return(x)
 }
 
 s.spline <- function(x, ...) {
   s <- smooth.spline(x, ...)
-  class(s) <- c("ESR.Spectrum", class(s))
-  return(s)
+  x$x <- s$x
+  x$y <- s$y
+  class(x) <- c("ESR.Spectrum", class(x))
+  attr(x, "spectrum") <- c(attr(x, "spectrum"), "spline")
+  return(x)
 }
 
 gval <- function(v, H, x) {
-  # TODO: calculate g-value for all x-values in x$data
+  if (v >= 10) v <- as.numeric(paste0(strtrim(v, 1), ".", substr(v, 2, nchar(v))))
+  
   planck_const <- 6.62606957e-34 # SI: J/s 
   bohr_magneton <- 9.27400968e-24 # SI: J/T
   g <- (planck_const * v * 10^9) / (bohr_magneton * 10^-4 * H)
-  return(g)
+  
+  if (length(x$x) != length(g)) {
+    t <- abs(length(x$x) - length(g))
+    ifelse(length(x$x) > length(g), x <- x[1:c(nrow(x)-t)], g <- g[1:c(length(g)-1)]) # TODO: this causes x to loose its attributes
+  }
+  x$x <- g
+  class(x) <- c("ESR.Spectrum", class(x))
+  return(x)
 }
