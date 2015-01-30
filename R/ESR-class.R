@@ -19,8 +19,11 @@ ESR <- R6Class("ESR",
                    self$originator <- s
                  },
                  set_data = function(x) {
-                   if (!is.null(x) && ncol(x) == 2)
+                   if (!is.null(x) && ncol(x) == 2) {
                      self$data <- setnames(x, c("x", "y"))
+                     attr(self$data, "spectrum") <- "spectrum"
+                   }
+                     
                    else
                      message("Invalid data format! Data was not saved.")
                  }
