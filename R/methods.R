@@ -15,20 +15,56 @@ plot.ESR.Spectrum <- function(x, ...) {
   }
   
   plot(x, type = "l", main = "ESR Spectrum", xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ...)
-  mtext(get_mtext(attributes(x)$spectrum), cex = 0.8, line = 0.25)
+  mtext(get_mtext(rev(attributes(x)$spectrum)), cex = 0.8, line = 0.25)
   
   class(x) <- c("ESR.Spectrum", class(x))
 }
 
 get_mtext <- function(x) {
+  
   str <- vector("character", length(x))
   for (i in seq_along(x)) {
     if (x[i] == "diff") {
-      
+      if (exists("cnt")) {
+        if (cnt > 0) {
+          cnt <- cnt - 1
+          next
+        }
+      }
+      cnt <- 0
+      j <- 1
+      while(x[i+j] == "diff" && !is.na(x[i+j])) {
+        j <- j+1
+        cnt <- cnt+1
+      }
+      str[i] <- paste0(j, ". derivative")
     }
-  }
+    else if (x[i] == "spline") {
+      if (exists("cnt")) {
+        if (cnt > 0) {
+          cnt <- cnt - 1
+          next
+        }
+      }
+      cnt <- 0
+      j <- 1
+      while(x[i+j] == "spline" && !is.na(x[i+j])) {
+        j <- j+1
+        cnt <- cnt+1
+      }
+      str[i] <- "smoothed"
+    }
+    else if (x[i] == "spectrum") str[i] <- "spectrum"
+    
+  }#EndOf::loop
+
+  
+  
+  str <- paste(str[str != ""], collapse = " ")
   return(str)
 }
+
+
 
 # Methods for R6 Classes
 
