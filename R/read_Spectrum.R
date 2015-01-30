@@ -176,6 +176,7 @@ read_Spectrum <- function(file, ...) {
       obj[[i]] <- ESR.Spectrum$new()
       obj[[i]]$set_data(res[[i]][[1]])
       obj[[i]]$set_par(res[[i]][[2]])
+      obj[[i]]$set_origin(files[i])
     }
   }
   
@@ -186,6 +187,7 @@ read_Spectrum <- function(file, ...) {
     obj <- ESR.Spectrum$new()
     obj$set_data(df$data)
     obj$set_par(df$par)
+    obj$set_origin(file)
   }
   
   ## CONSOLE ----
