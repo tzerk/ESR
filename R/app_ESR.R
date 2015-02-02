@@ -15,15 +15,17 @@
 #' 
 #' \dontrun{
 #' app_ESR("converter")
+#' app_ESR("spectrum")
 #' }
 #' 
 #' @export app_ESR
 
 app_ESR <- function(app, ...) {
-  
   valid_apps <- c("converter", "spectrum")
-  if (!app %in% valid_apps) stop(paste("invalid app name:", app))
   
-  runApp(system.file(paste0("shiny/",app), package = "ESR"), ...)
+  if (!app %in% valid_apps) 
+    return(message(paste0("Invalid app name: ", app, " \n Valid options are: ", paste(valid_apps, collapse = ", "))))
+  
+  runApp(system.file(paste0("shiny/",app), package = "ESR"), display.mode = "showcase", ...)
   
 }
