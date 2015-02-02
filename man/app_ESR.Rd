@@ -26,6 +26,7 @@ This is a wrapper function for \code{runApp}.
 \examples{
 \dontrun{
 app_ESR("converter")
+app_ESR("spectrum")
 }
 }
 \author{
