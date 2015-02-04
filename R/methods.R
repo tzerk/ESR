@@ -1,7 +1,12 @@
 # Plot methods for R6 Classes
 plot.ESR.Spectrum <- function(x, ...) {
-  if ("R6" %in% class(x)) x <- x$data
-  else class(x) <- class(x)[which(class(x) != "ESR.Spectrum")]
+  if ("R6" %in% class(x)) {
+    main <- x$originator
+    x <- x$data
+  } else {
+    class(x) <- class(x)[which(class(x) != "ESR.Spectrum")]
+    main <- "ESR Spectrum"
+  } 
   xlim <- range(pretty(x$x))
   if (all(x$x < 3)) {
     xlab <- "g-factor"
@@ -13,15 +18,12 @@ plot.ESR.Spectrum <- function(x, ...) {
       xlab <- "Magnetic Field (G)"
     }
   }
-  
-  plot(x, type = "l", main = "ESR Spectrum", xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ...)
+  plot(x, type = "l", main = main, xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ...)
   mtext(describe_spectrum(rev(attributes(x)$spectrum)), cex = 0.8, line = 0.25)
-  
   class(x) <- c("ESR.Spectrum", class(x))
 }
 
 describe_spectrum <- function(x) {
-  
   str <- vector("character", length(x))
   for (i in seq_along(x)) {
     if (x[i] == "diff") {
@@ -70,11 +72,7 @@ describe_spectrum <- function(x) {
       str[i] <- paste0(j, ". integral")
     }
     else if (x[i] == "spectrum" && length(x) == 1) str[i] <- "spectrum"
-    
   }#EndOf::loop
-
-  
-  
   str <- paste(str[str != ""], collapse = " ")
   return(str)
 }
@@ -124,7 +122,6 @@ gval <- function(v, H, x) {
   planck_const <- 6.62606957e-34 # SI: J/s 
   bohr_magneton <- 9.27400968e-24 # SI: J/T
   g <- (planck_const * v * 10^9) / (bohr_magneton * 10^-4 * H)
-  
   if (length(x$x) != length(g)) {
     t <- abs(length(x$x) - length(g))
     ifelse(length(x$x) > length(g), x <- x[1:c(nrow(x)-t)], g <- g[1:c(length(g)-1)]) # TODO: this causes x to loose its attributes
