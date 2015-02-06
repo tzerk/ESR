@@ -127,7 +127,7 @@ plot_Spectrum(ExampleData.ESRspectra$Ba01,
                  overlay = FALSE)
 }
 \author{
-Christoph Burow, University of Cologne (Germany) Who wrote it
+Christoph Burow, University of Cologne (Germany)
 }
 \references{
 In progress
