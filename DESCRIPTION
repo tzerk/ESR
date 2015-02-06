@@ -31,4 +31,5 @@ Collate:
     'fit_SSE.R'
     'plot_Spectrum.R'
     'read_Spectrum.R'
+    'utils.R'
     'zzz.R'
