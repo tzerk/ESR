@@ -1,12 +1,11 @@
 #' Plot ESR spectra and peak finding
 #' 
 #' Function to plot an ESR spectrum and finding peaks using an automated
-#' routine. Peaks can also be picked manually to calculate the amplitude in
-#' intensity.
+#' routine.
 #' 
 #' \bold{Status} \cr\cr In progress
 #' 
-#' @param input.data \code{\link{data.frame}} (\bold{required}): data frame
+#' @param data \code{\link{data.frame}} (\bold{required}): data frame
 #' with two columns for x=magnetic.field or g.value, y=ESR.intensity.
 #' @param difference \code{\link{logical}} (with default): plot first
 #' derivative of the spectrum
@@ -33,16 +32,9 @@
 #' @param peak.information \code{\link{logical}} (with default): plot peak
 #' intensity values for peaks found by the automated routine
 #' (\code{TRUE/FALSE}). Applies only when \code{find.peaks = TRUE}.
-#' @param manual.peaks \code{\link{logical}} (with default): manually identify
-#' xy-coordinates to be used for amplitude calculation (\code{TRUE/FALSE}).
-#' @param manual.peaks.roi \code{\link{logical}} (with default): define area
-#' for the plot to be zoomed in to allow for a more precise manual peak picking
-#' (\code{TRUE/FALSE}). Applies only when \code{manual.peaks = TRUE}.
 #' @param info \code{\link{character}}: add information on experimental details
 #' as subtitle
-#' @param output.console \code{\link{logical}} (with default): print output
-#' (\code{TRUE/FALSE}).
-#' @param output.plot \code{\link{logical}} (with default): show plot
+#' @param plot \code{\link{logical}} (with default): show plot
 #' (\code{TRUE/FALSE}).
 #' @param add \code{\link{logical}} (with default): whether derivatives and/or
 #' integrands are added to the spectrum or are shown separately
@@ -54,12 +46,10 @@
 #' \item{data}{list containing the (modified) input data} \item{splines}{list
 #' containing the spline objects} \item{auto.peaks}{data frame containing the
 #' peak information (magnetic field and ESR intensity) found by the peak find
-#' routine.} \item{manual.peaks}{vector containing the peak information
-#' (magnetic field, ESR intensity and amplitude) from the manually identified
-#' peaks.}
+#' routine.}
 #' @export
 #' @note In progress
-#' @author Christoph Burow, University of Cologne (Germany) Who wrote it
+#' @author Christoph Burow, University of Cologne (Germany)
 #' @seealso \code{\link{plot}}
 #' @references In progress
 #' @examples
@@ -72,7 +62,7 @@
 #' plot_Spectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
 #'                  peak.range = c(3340,3355),
 #'                  peak.threshold = 10, peak.information = TRUE,
-#'                  output.console = TRUE)
+#'                  verbose = TRUE)
 #' 
 #' ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
 #' plot_Spectrum(ExampleData.ESRspectra$Ba01_00,
@@ -96,14 +86,12 @@
 #'                  overlay = FALSE)
 #' 
 #' 
-#' 
 #' @export plot_Spectrum
-plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE, 
-                             smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
-                             auto.shift = FALSE, find.peaks = FALSE, peak.range, peak.threshold = 10, 
-                             peak.information = FALSE, manual.peaks = FALSE, manual.peaks.roi = FALSE, 
-                             info = NULL, output.console = TRUE, output.plot = TRUE, add = FALSE, 
-                             ...) {
+plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE, 
+                          smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
+                          auto.shift = FALSE, find.peaks = FALSE, peak.range, peak.threshold = 10, 
+                          peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, 
+                          ...) {
   
   
   ## ==========================================================================##
@@ -111,49 +99,36 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## ==========================================================================##
   
   ## check if provided data fulfill the requirements
-  
-  # 1. check if input.data is a data.frame or RLum.Data.Curve object
-  if (is.data.frame(input.data) == FALSE) {
-    if (is(input.data, "RLum.Data.Curve") == FALSE) {
-      stop("\n [plot_ESRspectrum] >> input.data has to be of type data.fame or RLum.Data.Curve!")
-      
-    } else {
-      input.data <- get_RLum.Data.Curve(input.data)
-    }
-  } else {
-    
-    # 2. verify if data frame has two or three columns
-    if (is.data.frame(input.data) == TRUE) {
-      if (length(input.data) != 2) {
-        cat(paste("Please provide a data frame with two columns", 
-                  "(x=magnetic.field, y=ESR.intensity)"), fill = FALSE)
-        stop(domain = NA)
-      }
-    }
-    
-    input.data <- list(input.data)
+  if (is.data.frame(data)) {
+    if (length(data) != 2)
+      stop("\n Please provide a data frame with two columns (x=magnetic.field, y=ESR.intensity)")
+    data <- list(data)
+  } 
+  else if (is.list(data)) {
+    # TODO: check if all list items are dataframes
   }
-  
-  
+  else if ("ESR.Spectrum" %in% class(data)) {
+    data <- list(as.data.frame(data$data))
+  }
+  else stop("\n [plot_ESRspectrum] >> data has to be of type data.fame, list or ESR.Spectrum!")
   
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ## ==========================================================================##
   
   # save column names for legend
-  colnames <- colnames(input.data)
+  colnames <- colnames(data)
   
   # difference
   if (difference == TRUE) {
-    temp <- lapply(input.data, function(x) {
+    temp <- lapply(data, function(x) {
       diff(x[, 2])
     })
     
     deriv_one <- list()
     
-    for (i in 1:length(input.data)) {
-      deriv_one[[i]] <- as.data.frame(cbind(input.data[[i]][1:length(input.data[[i]][, 
-                                                                                     1]) - 1, 1], temp[[i]]))
+    for (i in 1:length(data)) {
+      deriv_one[[i]] <- as.data.frame(cbind(data[[i]][1:length(data[[i]][ , 1]) - 1, 1], temp[[i]]))
     }
     deriv_one <- lapply(deriv_one, function(x) {
       colnames(x) <- c("x", "y")
@@ -161,8 +136,8 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     })
   }
   
-  # label input.data data frame for easier addressing
-  input.data <- lapply(input.data, function(x) {
+  # label data data frame for easier addressing
+  data <- lapply(data, function(x) {
     colnames(x) <- c("x", "y")
     x
   })
@@ -173,25 +148,18 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## ==========================================================================##
   
   if (integrate == TRUE || auto.shift == TRUE) {
-    
-    temp <- lapply(input.data, function(x) {
-      
+    temp <- lapply(data, function(x) {
       t1 <- as.numeric(x[, 2])
       t2 <- x[, 2]
       for (i in 1:length(t1)) {
-        
         t1[i] <- sum(t2[1:i])
       }
       return(t1)
     })
-    
     integrand <- list()
-    
-    for (i in 1:length(input.data)) {
-      integrand[[i]] <- as.data.frame(cbind(input.data[[i]][1:length(input.data[[i]][, 
-                                                                                     1]), 1], temp[[i]]))
+    for (i in 1:length(data)) {
+      integrand[[i]] <- as.data.frame(cbind(data[[i]][1:length(data[[i]][,1]), 1], temp[[i]]))
     }
-    
     integrand <- lapply(integrand, function(x) {
       colnames(x) <- c("x", "y")
       x
@@ -203,7 +171,6 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## ==========================================================================##
   
   if (smooth.spline == TRUE && difference == TRUE) {
-    
     if (missing(smooth.spline.diff.df) == TRUE) {
       smooth.spline.diff.df <- smooth.spline(deriv_one[[1]])$df
     } else {
@@ -213,14 +180,17 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     deriv_one.spline <- lapply(deriv_one, function(x) {
       smooth.spline(x, df = smooth.spline.diff.df)
     })
-    
   }
   
   ## ==========================================================================##
   ## CHECK ... ARGUMENTS
   ## ==========================================================================##
-  
   extraArgs <- list(...)
+  if ("verbose" %in% names(extraArgs)) {
+    verbose <- extraArgs$verbose
+  } else {
+    verbose <- TRUE
+  }
   
   if ("ylim" %in% names(extraArgs)) {
     ylim <- extraArgs$ylim
@@ -235,17 +205,14 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
         })
       }
     } else {
-      ylim.data <- input.data
+      ylim.data <- data
     }
-    
     ymin <- min(unlist((lapply(ylim.data, function(x) {
       min(x[2])
     }))))
     ymax <- max(unlist((lapply(ylim.data, function(x) {
       max(x[2])
     }))))
-    
-    
     ymax <- ymax * 1.2
     if (ymin < 0) {
       ymin <- ymin * 1.2
@@ -258,9 +225,9 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   if ("xlim" %in% names(extraArgs)) {
     xlim <- extraArgs$xlim
   } else {
-    # xlim<- c(min(input.data[[1]][1])*0.9998,
-    # max(input.data[[1]][1])*1.0002)
-    xlim <- range(pretty(c(min(input.data[[1]][1]), max(input.data[[1]][1]))))
+    # xlim<- c(min(data[[1]][1])*0.9998,
+    # max(data[[1]][1])*1.0002)
+    xlim <- range(pretty(c(min(data[[1]][1]), max(data[[1]][1]))))
   }
   
   if ("main" %in% names(extraArgs)) {
@@ -347,10 +314,9 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   
   if (smooth.spline == TRUE || auto.shift == TRUE) {
     if (missing(smooth.spline.df) == TRUE) {
-      smooth.spline.df <- smooth.spline(input.data[[1]])$df
+      smooth.spline.df <- smooth.spline(data[[1]])$df
     }
-    
-    spline <- lapply(input.data, function(x) {
+    spline <- lapply(data, function(x) {
       smooth.spline(x, df = smooth.spline.df)
     })
   }
@@ -359,8 +325,7 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## SHIFT SPECTRA
   ## ==========================================================================##
   
-  if (auto.shift == TRUE && (length(input.data) > 1) == TRUE) {
-    
+  if (auto.shift == TRUE && (length(data) > 1) == TRUE) {
     # DEPRECATED - shift spectra by maximum peak in smoothing splines
     # pos.peak.max<- unlist( lapply(spline, function(x) {
     # x[[1]][which.max(x[[2]])] }) )
@@ -372,25 +337,20 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     
     diff.peak.max <- pos.peak.max[1] - pos.peak.max
     
-    for (i in 1:length(input.data)) {
-      
+    for (i in 1:length(data)) {
       # shift real data
-      input.data[[i]][, 1] <- input.data[[i]][, 1] + diff.peak.max[i]
-      
+      data[[i]][, 1] <- data[[i]][, 1] + diff.peak.max[i]
       if (smooth.spline == TRUE) {
         # shift splines
         spline[[i]][[1]] <- spline[[i]][[1]] + diff.peak.max[i]
       }
-      
       # shift integrand
       integrand[[i]][[1]] <- integrand[[i]][[1]] + diff.peak.max[i]
-      
       if (difference == TRUE) {
         # shift spline of derivative
         deriv_one.spline[[i]][[1]] <- deriv_one.spline[[i]][[1]] + 
           diff.peak.max[i]
       }
-      
     }
   }
   
@@ -398,103 +358,89 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## FIND PEAKS
   ## ==========================================================================##
   
-  if (find.peaks == TRUE && length(input.data) == 1) {
-    
-    
+  if (find.peaks == TRUE && length(data) == 1) {
     if (missing(peak.range) == TRUE) {
-      peak.range <- c(min(input.data[[1]][, 1]), max(input.data[[1]][, 
-                                                                     1]))
+      peak.range <- c(min(data[[1]][, 1]), max(data[[1]][,1]))
     }
-    
-    
-    input.temp <- input.data
-    
+    input.temp <- data
     if (smooth.spline == TRUE) {
       if (difference == TRUE) {
-        input.data[[1]][1:1023, 2] <- deriv_one.spline[[1]]$y
+        data[[1]][1:1023, 2] <- deriv_one.spline[[1]]$y
       } else {
-        input.data[[1]][, 2] <- spline[[1]]$y
+        data[[1]][, 2] <- spline[[1]]$y
       }
     } else {
       if (difference == TRUE) {
-        input.data[[1]] <- deriv_one[[1]]
+        data[[1]] <- deriv_one[[1]]
       }
     }
     
     ## Preparation
+    scan.width <- seq(from = 1, to = length(data[[1]]$x), by = 1)
     
-    scan.width <- seq(from = 1, to = length(input.data[[1]]$x), by = 1)
-    
-    peak.max.storage <- matrix(data = NA, nrow = length(scan.width), 
+    peak.max.storage <- matrix(data = NA, 
+                               nrow = length(scan.width), 
                                ncol = 2)
-    
-    peak.min.storage <- matrix(data = NA, nrow = length(scan.width), 
+    peak.min.storage <- matrix(data = NA, 
+                               nrow = length(scan.width), 
                                ncol = 2)
     
     ## FIND PEAKS
-    
-    for (i in 1:length(input.data[[1]]$x)) {
-      
+    for (i in 1:length(data[[1]]$x)) {
       # find max peaks
-      if (any(abs(input.data[[1]]$y[i:c(i + if (i + peak.threshold > 
-                                                  length(input.data[[1]]$x)) {
-        length(input.data[[1]]$x) - i
+      if (any(abs(data[[1]]$y[i:c(i + if (i + peak.threshold > 
+                                                  length(data[[1]]$x)) {
+        length(data[[1]]$x) - i
       } else {
         peak.threshold
-      })]) > abs(input.data[[1]]$y[i])) == FALSE) {
+      })]) > abs(data[[1]]$y[i])) == FALSE) {
         
-        if (any(abs(input.data[[1]]$y[c(i - if (i < peak.threshold) {
+        if (any(abs(data[[1]]$y[c(i - if (i < peak.threshold) {
           i - 1
         } else {
           peak.threshold
-        }):i]) > abs(input.data[[1]]$y[i])) == TRUE) {
+        }):i]) > abs(data[[1]]$y[i])) == TRUE) {
         } else {
-          if (input.data[[1]]$x[i] > peak.range[1] && input.data[[1]]$x[i] < 
+          if (data[[1]]$x[i] > peak.range[1] && data[[1]]$x[i] < 
                 peak.range[2]) {
-            peak.max.storage[i, ] <- as.matrix(c(input.data[[1]]$x[i], 
-                                                 input.data[[1]]$y[i]))
+            peak.max.storage[i, ] <- as.matrix(c(data[[1]]$x[i], 
+                                                 data[[1]]$y[i]))
           }
           
         }
       }
       # find min peaks
-      if (any(abs(input.data[[1]]$y[i:c(i + if (i + peak.threshold > 
-                                                  length(input.data[[1]]$x)) {
-        length(input.data[[1]]$x) - i
+      if (any(abs(data[[1]]$y[i:c(i + if (i + peak.threshold > 
+                                                  length(data[[1]]$x)) {
+        length(data[[1]]$x) - i
       } else {
         peak.threshold
-      })]) < abs(input.data[[1]]$y[i])) == FALSE) {
+      })]) < abs(data[[1]]$y[i])) == FALSE) {
         
-        if (any(abs(input.data[[1]]$y[c(i - if (i < peak.threshold) {
+        if (any(abs(data[[1]]$y[c(i - if (i < peak.threshold) {
           i - 1
         } else {
           peak.threshold
-        }):i]) < abs(input.data[[1]]$y[i])) == TRUE) {
+        }):i]) < abs(data[[1]]$y[i])) == TRUE) {
         } else {
-          if (input.data[[1]]$x[i] > peak.range[1] && input.data[[1]]$x[i] < 
+          if (data[[1]]$x[i] > peak.range[1] && data[[1]]$x[i] < 
                 peak.range[2]) {
-            peak.min.storage[i, ] <- as.matrix(c(input.data[[1]]$x[i], 
-                                                 input.data[[1]]$y[i]))
+            peak.min.storage[i, ] <- as.matrix(c(data[[1]]$x[i], 
+                                                 data[[1]]$y[i]))
           }
         }
       }
     }
-    
-    
-    
     all.peaks <- as.data.frame(rbind(na.omit(peak.max.storage), na.omit(peak.min.storage)))
     all.peaks <- all.peaks[order(all.peaks[, 1]), ]
     colnames(all.peaks) <- c("magnetic.field", "ESR.intensity")
-    
-    input.data <- input.temp
+    data <- input.temp
   }
   
   ## ==========================================================================##
   ## TERMINAL OUTPUT
   ## ==========================================================================##
-  
-  if (output.console == TRUE && find.peaks == TRUE && length(input.data) == 
-        1) {
+  if (verbose == TRUE && find.peaks == TRUE && length(data) == 1) {
     print(all.peaks)
   }
   
@@ -502,15 +448,15 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   ## PLOTTING
   ## ==========================================================================##
   
-  if (output.plot == TRUE) {
+  if (plot == TRUE) {
     
-    colororder = c(rgb(0, 0, 0), rgb(0, 0, 1), rgb(0, 0.5, 0), rgb(1, 
-                                                                   0, 0), rgb(0, 0.75, 0.75), rgb(0.75, 0, 0.75), rgb(0.75, 0.75, 
-                                                                                                                      0), rgb(0.25, 0.25, 0.25), rgb(0.75, 0.25, 0.25), rgb(0.95, 
-                                                                                                                                                                            0.95, 0), rgb(0.25, 0.25, 0.75), rgb(0.75, 0.75, 0.75), rgb(0, 
-                                                                                                                                                                                                                                        1, 0), rgb(0.76, 0.57, 0.17), rgb(0.54, 0.63, 0.22), rgb(0.34, 
-                                                                                                                                                                                                                                                                                                 0.57, 0.92), rgb(1, 0.1, 0.6), rgb(0.88, 0.75, 0.73), rgb(0.1, 
-                                                                                                                                                                                                                                                                                                                                                           0.49, 0.47), rgb(0.66, 0.34, 0.65), rgb(0.99, 0.41, 0.23))
+    colororder = c(rgb(0, 0, 0), rgb(0, 0, 1), rgb(0, 0.5, 0), 
+                   rgb(1, 0, 0), rgb(0, 0.75, 0.75), rgb(0.75, 0, 0.75), 
+                   rgb(0.75, 0.75, 0), rgb(0.25, 0.25, 0.25), rgb(0.75, 0.25, 0.25), 
+                   rgb(0.95,  0.95, 0), rgb(0.25, 0.25, 0.75), rgb(0.75, 0.75, 0.75), 
+                   rgb(0, 1, 0), rgb(0.76, 0.57, 0.17), rgb(0.54, 0.63, 0.22), 
+                   rgb(0.34,  0.57, 0.92), rgb(1, 0.1, 0.6), rgb(0.88, 0.75, 0.73),
+                   rgb(0.1,  0.49, 0.47), rgb(0.66, 0.34, 0.65), rgb(0.99, 0.41, 0.23))
     
     if (is.null(info) == TRUE) {
       # general plot parameters
@@ -574,7 +520,7 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
       if (smooth.spline == TRUE) {
         temp.data <- cbind(spline[[1]]$x, spline[[1]]$y)
       } else {
-        temp.data <- input.data[[1]]
+        temp.data <- data[[1]]
       }
       
       
@@ -598,7 +544,7 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     }
     
     # background of the plot region
-    if (length(input.data) > 1) {
+    if (length(data) > 1) {
       rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
            col = "grey90")
       
@@ -609,7 +555,7 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     plot_line <- function(data, color, id) {
       
       if (overlay == TRUE && smooth.spline == TRUE) {
-        if (id == "input.data" || id == "deriv") {
+        if (id == "data" || id == "deriv") {
           color <- adjustcolor(color, alpha.f = 0.33)
         }
       }
@@ -622,18 +568,18 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
             pch = pch)
     }  ##EndOf::plot_line()
     
-    if (length(input.data) > 1) {
+    if (length(data) > 1) {
       col <- colororder
     }
     
     # add sprectum lines (either measured data or splines)
-    for (i in 1:length(input.data)) {
+    for (i in 1:length(data)) {
       
       # INPUT DATA
       if (add == TRUE || c(smooth.spline == FALSE && difference == 
                              FALSE)) {
-        plot_line(cbind(input.data[[i]]$x, input.data[[i]]$y), 
-                  col[i], "input.data")
+        plot_line(cbind(data[[i]]$x, data[[i]]$y), 
+                  col[i], "data")
       }
       
       # SPLINE
@@ -657,20 +603,15 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     }  ##EndOf::Loop
     
     # add legend
-    if (length(input.data) > 1 && legend == TRUE) {
+    if (length(data) > 1 && legend == TRUE) {
       legend(legend.pos, legend = colnames, lty = 1, lwd = 3, col = col, 
              cex = 0.8, ncol = 2)
     }
     
-    temp.plot <- recordPlot()
-    
-    
     ## ==========================================================================##
     ## AUTOMATIC PEAK FINDING
     ## ==========================================================================##
-    
-    
-    if (find.peaks == TRUE && length(input.data) == 1) {
+    if (find.peaks == TRUE && length(data) == 1) {
       
       # plot min/max peaks
       points(all.peaks, col = "red", pch = 19)
@@ -689,7 +630,6 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
                xpd = TRUE)
         }
       }
-      temp.plot <- recordPlot()
     }
     
     ## ==========================================================================##
@@ -697,7 +637,6 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     ## ==========================================================================##
     
     if (integrate == TRUE) {
-      
       y <- max(unlist(lapply(integrand, function(x) {
         max(x[2])
       })))
@@ -713,107 +652,16 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
         }
       }
     }
-    
-    ## ==========================================================================##
-    ## MANUAL PEAK IDENTIFICATION
-    ## ==========================================================================##
-    
-    if (manual.peaks == TRUE && length(input.data) == 1) {
-      if (manual.peaks.roi == FALSE) {
-        mtext("Choose two peaks", side = 3, line = 0, cex = 0.8)
-      }
-      
-      identifyPch <- function(x, y = NULL, n = 2, pch = 19, ...) {
-        xy <- xy.coords(x, y)
-        x <- xy$x
-        y <- xy$y
-        sel <- rep(FALSE, length(x))
-        res <- integer(0)
-        
-        while (sum(sel) < n) {
-          ans <- identify(x[!sel], y[!sel], n = 1, plot = TRUE, 
-                          labels = round(y[!sel]), xpd = TRUE, ...)
-          
-          if (!length(ans)) 
-            break
-          ans <- which(!sel)[ans]
-          points(x[ans], y[ans], pch = pch, cex = 1.4, col = "green4")
-          sel[ans] <- TRUE
-          res <- c(res, ans)
-        }
-        res
-      }
-      
-      
-      if (manual.peaks.roi == TRUE) {
-        
-        coords <- vector(mode = "integer")
-        zoom.data <- if (smooth.spline == TRUE) {
-          spline
-        } else {
-          input.data
-        }
-        
-        for (i in 1:2) {
-          mtext(paste("Define zoom area for peak", i), side = 3, 
-                line = 0, cex = 0.8)
-          
-          zoom.area <- identifyPch(zoom.data[[1]]$x, zoom.data[[1]]$y, 
-          )
-          
-          plot(zoom.data[[1]]$x, zoom.data[[1]]$y, main = main, 
-               ylim = c(min(zoom.data[[1]]$y[zoom.area[1]:zoom.area[2]]), 
-                        max(zoom.data[[1]]$y[zoom.area[1]:zoom.area[2]])), 
-               xlim = zoom.data[[1]]$x[zoom.area], type = "l", bty = "l", 
-               xpd = FALSE, xlab = expression("Magnetic field [G]"), 
-               ylab = ylab)
-          
-          mtext(paste("Choose peak", i), side = 3, line = 0, cex = 0.8)
-          
-          coords[i] <- identifyPch(zoom.data[[1]]$x, zoom.data[[1]]$y, 
-                                   n = 1)
-          replayPlot(temp.plot)
-          
-        }
-        
-        points(zoom.data[[1]]$x[coords], zoom.data[[1]]$y[coords], 
-               pch = 19, col = "green4", cex = 1.4)
-        
-        text(zoom.data[[1]]$x[coords], zoom.data[[1]]$y[coords], 
-             labels = round(zoom.data[[1]]$y[coords]), pos = c(3, 
-                                                               1), xpd = TRUE)
-        
-      } else {
-        
-        coords <- identifyPch(zoom.data[[1]]$x, zoom.data[[1]]$y)
-        
-      }
-      
-      
-      amplitude <- abs(zoom.data[[1]]$y[coords[1]] - zoom.data[[1]]$y[coords[2]])
-      
-      
-      
-      cat(paste("\n ------- Selected Peaks -------"))
-      cat(paste("\n Peak 1: ", round(zoom.data[[1]]$x[coords[1]]), 
-                "[G] ", round(zoom.data[[1]]$y[coords[1]], 2), "[a.u.]"))
-      cat(paste("\n Peak 2: ", round(zoom.data[[1]]$x[coords[2]]), 
-                "[G] ", round(zoom.data[[1]]$y[coords[2]], 2), "[a.u.]"))
-      cat(paste("\n Amplitude: ", round(amplitude), "[a.u.]"))
-      
-      
-      
-    }
   }
   ## ==========================================================================##
   ## RETURN VALUES
   ## ==========================================================================##
   
   # create data frame for output
-  if (find.peaks == FALSE || length(input.data) > 1) {
+  if (find.peaks == FALSE || length(data) > 1) {
     all.peaks <- NULL
   }
-  if (find.peaks == TRUE && length(input.data) == 1) {
+  if (find.peaks == TRUE && length(data) == 1) {
     man.peaks <- NULL
   }
   if (smooth.spline == FALSE) {
@@ -828,12 +676,6 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
     deriv_one.spline <- NULL
   }
   
-  if (manual.peaks == TRUE && length(input.data) == 1) {
-    man.peaks <- data.frame(peak1_field = input.data[[1]]$x[1], peak1_intensity = input.data[[1]]$y[1], 
-                            peak2_field = input.data[[1]]$x[2], peak2_intensity = input.data[[1]]$y[2], 
-                            amplitude = amplitude)
-  }
-  
   # plot calculus data
   plot.par <- list(ylim = ylim, xlim = xlim, ylim.integrand = if (integrate == 
                                                                     TRUE) {
@@ -843,7 +685,7 @@ plot_Spectrum <- function(input.data, difference = FALSE, integrate = FALSE,
   })
   
   # return output data.frame and nls.object fit
-  invisible(list(data = input.data, derivative = deriv_one, integrand = integrand, 
+  invisible(list(data = data, derivative = deriv_one, integrand = integrand, 
                  splines = spline, diff.splines = deriv_one.spline, auto.peaks = all.peaks, 
-                 manual.peaks = manual.peaks, plot.par = plot.par))
+                 plot.par = plot.par))
 }
