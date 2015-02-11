@@ -67,7 +67,6 @@ ESR <- R6Class("ESR",
                      self$data <- setnames(x, c("x", "y"))
                      attr(self$data, "spectrum") <- "spectrum"
                    }
-                     
                    else
                      message("Invalid data format! Data was not saved.")
                  }
@@ -109,6 +108,9 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           },
                           get_spline = function(x = self$data, ...) {
                             invisible(s.spline(x, ...))
+                          },
+                          get_peaks = function(x = self$data, interval, th = 10) {
+                            invisible(peaks(x, interval, th))
                           }
                         )
 )
