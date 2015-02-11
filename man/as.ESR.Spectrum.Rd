@@ -2,12 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{as.ESR.Spectrum}
 \alias{as.ESR.Spectrum}
+\alias{is.ESR.Spectrum}
 \title{Coercion from and to ESR.Spectrum}
 \usage{
 as.ESR.Spectrum(x)
+
+is.ESR.Spectrum(x)
 }
 \arguments{
-\item{x}{an object}
+\item{x}{an object to coerce to an \code{ESR.Spectrum}}
 }
 \value{
 \code{as.ESR.Spectrum} returns an \code{ESR.Spectrum} object.
@@ -17,10 +20,22 @@ A generic function \code{as.ESR.Spectrum} for coercing objects
 to class "\code{ESR.Spectrum}".
 }
 \details{
-\code{as.ESR.Spectrum} currently includes methods for \link{data.frame} objects.
+\code{as.ESR.Spectrum} currently includes methods for \link{data.frame}, \link{data.table} objects. \cr\cr
+Methods for coercing objects of class "\code{ESR.Spectrum}" to other classes currently include:
+\link{as.data.frame}, \link{as.data.frame}, \link{as.list}, \link{as.matrix}. Coercion from \code{ESR.Spectrum}
+to any of these classes converts the raw measurement data (\code{$data} attribute) to respective class.
 }
 \examples{
-## TODO
+## coercion to ESR.Spectrum:
+## default method
+x <- as.ESR.Spectrum(data.frame(seq(3350, 3450, length.out = 1024),
+                                runif(1024, -1000, 1000)))
+
+## coercion from ESR.Spectrum:
+as.matrix(x)
+as.data.frame(x)
+data.table::as.data.table(x)
+as.list(x)
 }
 \author{
 Christoph Burow, University of Cologne (Germany)
