@@ -61,7 +61,7 @@ read_Spectrum <- function(file, ...) {
     if (is.na(val)) {
       file_list <- list.files(f, paste0(valid_ext, collapse = "|"), ignore.case = TRUE)
       if (length(file_list) == 0) {
-        stop(paste("Invalid file extension:", ext))
+        stop(paste("Invalid file extension:", ext), call. = FALSE)
       }
       ext <- list(file_list)
     }
