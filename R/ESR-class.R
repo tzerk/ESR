@@ -1,6 +1,50 @@
 #' @include methods.R
 NULL
 
+# Objects of class ESR
+# 
+# Objects of class \code{ESR}, \code{ESR.Spectrum} are \link{R6} objects and hence are 
+# usable in a more typical object-oriented language than R. For the user the main difference 
+# to R's internal \code{S3} and \code{S4} object implementation is that methods for \link{R6} 
+# objects belong to the object itself. See details.
+# 
+# ###
+# 
+# @docType class
+# @format \link{R6Class} generator objects
+# @keywords data
+# @author Christoph Burow, University of Cologne (Germany)
+# @export
+# @examples
+# 
+# ## create an empty ESR base class object
+# x <- ESR$new()
+# 
+# ## create an object of class ESR.Spectrum
+# ## and fill random data
+# x <- ESR.Spectrum$new()
+# x$set_data(data.frame(seq(3350, 3450, length.out = 1024), 
+#                                 runif(1024, -1000, 1000)))
+# 
+# # plot the random data
+# plot(x)
+# 
+# \dontrun{
+# ## public set methods
+# x$set_par()
+# x$set_data()
+# x$set_origin()
+# }
+#
+# ## public get methods
+# x$get_diff()
+# x$get_integral()
+# x$get_spline()
+# \dontrun{
+# x$get_gvalues()
+# }
+#
+#
 ESR <- R6Class("ESR",
                public = list(
                  originator = NA,
