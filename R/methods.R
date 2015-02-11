@@ -130,3 +130,8 @@ gval <- function(v, H, x) {
   class(x) <- c("ESR.Spectrum", class(x))
   return(x)
 }
+
+peaks <- function(x, interval, th = 10) {
+  p <- find_Peaks(x, interval, th)
+  return(p)
+}
