@@ -4,15 +4,14 @@
 \alias{plot_Spectrum}
 \title{Plot ESR spectra and peak finding}
 \usage{
-plot_Spectrum(input.data, difference = FALSE, integrate = FALSE,
+plot_Spectrum(data, difference = FALSE, integrate = FALSE,
   smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df,
   overlay = TRUE, auto.shift = FALSE, find.peaks = FALSE, peak.range,
-  peak.threshold = 10, peak.information = FALSE, manual.peaks = FALSE,
-  manual.peaks.roi = FALSE, info = NULL, output.console = TRUE,
-  output.plot = TRUE, add = FALSE, ...)
+  peak.threshold = 10, peak.information = FALSE, info = NULL,
+  plot = TRUE, add = FALSE, ...)
 }
 \arguments{
-\item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame
+\item{data}{\code{\link{data.frame}} (\bold{required}): data frame
 with two columns for x=magnetic.field or g.value, y=ESR.intensity.}
 
 \item{difference}{\code{\link{logical}} (with default): plot first
@@ -51,20 +50,10 @@ specifying the resolution of the peak finding routine (see details).}
 intensity values for peaks found by the automated routine
 (\code{TRUE/FALSE}). Applies only when \code{find.peaks = TRUE}.}
 
-\item{manual.peaks}{\code{\link{logical}} (with default): manually identify
-xy-coordinates to be used for amplitude calculation (\code{TRUE/FALSE}).}
-
-\item{manual.peaks.roi}{\code{\link{logical}} (with default): define area
-for the plot to be zoomed in to allow for a more precise manual peak picking
-(\code{TRUE/FALSE}). Applies only when \code{manual.peaks = TRUE}.}
-
 \item{info}{\code{\link{character}}: add information on experimental details
 as subtitle}
 
-\item{output.console}{\code{\link{logical}} (with default): print output
-(\code{TRUE/FALSE}).}
-
-\item{output.plot}{\code{\link{logical}} (with default): show plot
+\item{plot}{\code{\link{logical}} (with default): show plot
 (\code{TRUE/FALSE}).}
 
 \item{add}{\code{\link{logical}} (with default): whether derivatives and/or
@@ -80,14 +69,11 @@ containing the following elements:
 \item{data}{list containing the (modified) input data} \item{splines}{list
 containing the spline objects} \item{auto.peaks}{data frame containing the
 peak information (magnetic field and ESR intensity) found by the peak find
-routine.} \item{manual.peaks}{vector containing the peak information
-(magnetic field, ESR intensity and amplitude) from the manually identified
-peaks.}
+routine.}
 }
 \description{
 Function to plot an ESR spectrum and finding peaks using an automated
-routine. Peaks can also be picked manually to calculate the amplitude in
-intensity.
+routine.
 }
 \details{
 \bold{Status} \cr\cr In progress
@@ -103,7 +89,7 @@ data(ExampleData.ESRspectra, envir = environment())
 plot_Spectrum(ExampleData.ESRspectra$dpph, find.peaks = TRUE,
                  peak.range = c(3340,3355),
                  peak.threshold = 10, peak.information = TRUE,
-                 output.console = TRUE)
+                 verbose = TRUE)
 
 ##plot the mollusc (sample Ba01) natural ESR spectrum with a smoothing spline
 plot_Spectrum(ExampleData.ESRspectra$Ba01_00,

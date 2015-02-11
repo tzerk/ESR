@@ -102,6 +102,9 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   if (is.data.frame(data)) {
     if (length(data) != 2)
       stop("\n Please provide a data frame with two columns (x=magnetic.field, y=ESR.intensity)")
+    if (is.data.table(data))
+      data <- as.data.frame(data)
+    
     data <- list(data)
   } 
   else if (is.list(data)) {
@@ -110,7 +113,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   else if ("ESR.Spectrum" %in% class(data)) {
     data <- list(as.data.frame(data$data))
   }
-  else stop("\n [plot_ESRspectrum] >> data has to be of type data.fame, list or ESR.Spectrum!")
+  else stop("\n [plot_Spectrum] >> data has to be of type data.fame, data.table list or ESR.Spectrum!")
   
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
