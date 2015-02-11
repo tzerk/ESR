@@ -1,7 +1,7 @@
 Package: ESR
 Type: Package
 Title: Package for Electron Spin Resonance Dating data analysis
-Version: 1.2.4
+Version: 0.1.0.9000
 Date: 2014-08-29
 Authors@R: as.person(c(
     "Christoph Burow <christoph.burow@uni-koeln.de> [aut, cre]"
@@ -21,13 +21,13 @@ Imports:
     googleVis
 URL: https://github.com/tzerk/ESR
 BugReports: https://github.com/tzerk/ESR/issues
-LazyData: true
 Collate:
     'methods.R'
     'ESR-class.R'
     'ESR-package.R'
     'app_ESR.R'
     'calc_DePlateau.R'
+    'find_peaks.R'
     'fit_SSE.R'
     'plot_Spectrum.R'
     'read_Spectrum.R'
