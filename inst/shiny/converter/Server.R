@@ -2,14 +2,14 @@
 ## MAIN FUNCTION
 shinyServer(function(input, output, session) {
   
-  rval <- reactiveValues(conv_files = NULL)
+  rval <- reactiveValues(conv_files = NULL, save_path = NULL)
   
   datGet <- reactive({
     inFile <- input$files
     if (is.null(inFile)) return(NULL)
     return(inFile)
   })
-
+  
   observeEvent(input$btn, {
     file <- datGet()
     if (is.null(file)) return(NULL)
@@ -28,18 +28,26 @@ shinyServer(function(input, output, session) {
     else new_names <- file$name
     
     res <- lapply(new_paths, read_Spectrum)
-    
+    dest <- rep(NA, length(res))
     for (i in seq_along(res)) {
       data <- as.data.frame(res[[i]]$data)
-      dest <- paste0(input$todir, input$prefix, gsub("....$", "", new_names[i]), input$suffix, ".txt")
-      write.table(data, dest, row.names = FALSE, quote = FALSE)
+      dest[i] <- paste0(input$todir, "/", input$prefix, gsub("....$", "", new_names[i]), input$suffix, ".txt")
+      write.table(data, dest[i], row.names = FALSE, quote = FALSE)
     }
     rval$conv_files <- new_names
+    rval$save_path <- dest
   })
   
- output$js <- renderText({
-     if (!is.null(rval$conv_files))
-       paste(rval$conv_files, collapse = "</br>")
- })
-
+  output$text <- renderText({
+    if (!is.null(rval$conv_files)) {
+      msg <- paste("Files converted:</br>",
+                   paste(rval$conv_files, collapse = "</br>"),
+                   "</br></br>Saved files to:</br>",
+                   paste(rval$save_path, collapse = "</br>"))
+    } else {
+      msg <- "Please select a file (or files) to convert"
+    }
+    msg
+  })
+  
 })##EndOf::shinyServer(function(input, output)
