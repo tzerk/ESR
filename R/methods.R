@@ -1,4 +1,4 @@
-# Plot methods for R6 Classes
+#' @export
 plot.ESR.Spectrum <- function(x, ...) {
   if ("R6" %in% class(x)) {
     main <- x$originator
@@ -18,7 +18,9 @@ plot.ESR.Spectrum <- function(x, ...) {
       xlab <- "Magnetic Field (G)"
     }
   }
-  plot(x, type = "l", main = main, xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ...)
+  ylim <- range(pretty(x$y))
+  
+  plot(x, type = "l", main = main, xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ylim = ylim, ...)
   mtext(describe_spectrum(rev(attributes(x)$spectrum)), cex = 0.8, line = 0.25)
   class(x) <- c("ESR.Spectrum", class(x))
 }
@@ -76,8 +78,6 @@ describe_spectrum <- function(x) {
   str <- paste(str[str != ""], collapse = " ")
   return(str)
 }
-
-
 
 # Methods for R6 Classes
 
