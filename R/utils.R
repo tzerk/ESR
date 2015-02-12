@@ -1,83 +1,53 @@
-#' Coercion from and to ESR.Spectrum
-#' 
-#' A generic function \code{as.ESR.Spectrum} for coercing objects
-#' to class "\code{ESR.Spectrum}".
-#' 
-#' \code{as.ESR.Spectrum} currently includes methods for \link{data.frame}, \link{data.table} objects. \cr\cr
-#' Methods for coercing objects of class "\code{ESR.Spectrum}" to other classes currently include: 
-#' \link{as.data.frame}, \link{as.data.frame}, \link{as.list}, \link{as.matrix}. Coercion from \code{ESR.Spectrum}
-#' to any of these classes converts the raw measurement data (\code{$data} attribute) to respective class.
-#' 
-#' @param x an object to coerce to an \code{ESR.Spectrum}
-#' @return \code{as.ESR.Spectrum} returns an \code{ESR.Spectrum} object.
-#' @seealso \link{R6}, \link{R6Class}
-#' @author Christoph Burow, University of Cologne (Germany)
-#' @export as.ESR.Spectrum
-#' @examples
-#' 
-#' ## coercion to ESR.Spectrum:
-#' ## default method
-#' x <- as.ESR.Spectrum(data.frame(seq(3350, 3450, length.out = 1024), 
-#'                                 runif(1024, -1000, 1000)))
-#' 
-#' ## coercion from ESR.Spectrum:
-#' as.matrix(x)
-#' as.data.frame(x)
-#' data.table::as.data.table(x)
-#' as.list(x)
-#' 
-as.ESR.Spectrum <- function(x) {
-  ## Input validation ----
-  if (class(x)[1] != "data.frame" && class(x)[1] != "data.table")
-    stop("Please provide an object of class data.frame or data.table", 
-                call. = FALSE)
-  if (ncol(x) != 2L)
-    stop(paste0("Unexpected number of columns: ", ncol(x),". \n Please provide a two column data.frame or data.table.",
-                       , call. = FALSE))
-  
-  # User argument as origin
-  origin <- deparse(substitute(x))
-  
-  ## Coerce to data.table ----
-  if (!is.data.table(x)) 
-    x <- as.data.table(x)
-  
-  ## Create R6 Object ----
-  obj <- ESR.Spectrum$new()
-  obj$set_data(x)
-  obj$set_origin(origin)
-  return(obj)
-}
-
-
-
-
-#' @export
-#' @rdname as.ESR.Spectrum
-is.ESR.Spectrum <- function(x) {
-  inherits(x, "ESR.Spectrum")
-}
-
-#' @export
-# as.data.frame method for objects of class ESR.Spectrum
-as.data.frame.ESR.Spectrum <- function(x, ...) {
-  invisible(as.data.frame(x$data, ...))
-}
-
-#' @export
-# as.data.table method for objects of class ESR.Spectrum
-as.data.table.ESR.Spectrum <- function(x, ...) {
-  invisible(as.data.table(x$data, ...))
-}
-
-#' @export
-# as.list method for objects of class ESR.Spectrum
-as.list.ESR.Spectrum <- function(x, ...) {
-  invisible(as.list(x$data, ...))
-}
-
-#' @export
-# as.matrix method for objects of class ESR.Spectrum
-as.matrix.ESR.Spectrum <- function(x, ...) {
-  invisible(as.matrix(x$data, ...))
+describe_spectrum <- function(x) {
+  str <- vector("character", length(x))
+  for (i in seq_along(x)) {
+    if (x[i] == "diff") {
+      if (exists("cnt")) {
+        if (cnt > 0) {
+          cnt <- cnt - 1
+          next
+        }
+      }
+      cnt <- 0
+      j <- 1
+      while(x[i+j] == "diff" && !is.na(x[i+j])) {
+        j <- j+1
+        cnt <- cnt+1
+      }
+      str[i] <- paste0(j, ". derivative")
+    }
+    else if (x[i] == "spline") {
+      if (exists("cnt_spline")) {
+        if (cnt_spline > 0) {
+          cnt_spline <- cnt_spline - 1
+          next
+        }
+      }
+      cnt_spline <- 0
+      j <- 1
+      while(x[i+j] == "spline" && !is.na(x[i+j])) {
+        j <- j+1
+        cnt_spline <- cnt_spline + 1
+      }
+      str[i] <- "smoothed"
+    }
+    else if (x[i] == "integral") {
+      if (exists("cnt_int")) {
+        if (cnt_int > 0) {
+          cnt_int <- cnt_int - 1
+          next
+        }
+      }
+      cnt_int <- 0
+      j <- 1
+      while(x[i+j] == "integral" && !is.na(x[i+j])) {
+        j <- j+1
+        cnt_int <- cnt_int+1
+      }
+      str[i] <- paste0(j, ". integral")
+    }
+    else if (x[i] == "spectrum" && length(x) == 1) str[i] <- "spectrum"
+  }#EndOf::loop
+  str <- paste(str[str != ""], collapse = " ")
+  return(str)
 }
