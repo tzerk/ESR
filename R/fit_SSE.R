@@ -18,7 +18,7 @@
 #' ordinary bootstrapping (resampling with replacement). For each bootstrap
 #' sample a dose response curve is constructed by fitting the chosen function
 #' and the equivalent dose is calculated. The distribution of bootstrapping
-#' results is shown in a histogram, while a a \code{\link{qqnorm}} plot is
+#' results is shown in a histogram, while a \code{\link{qqnorm}} plot is
 #' generated to give indications for (non-)normal distribution of the data.
 #' 
 #' @param input.data \code{\link{data.frame}} (\bold{required}): data frame
