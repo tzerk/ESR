@@ -25,9 +25,6 @@ used to read in a series of associated ESR spectrum files. A list with all
 spectrum data is returned, which can be passed to \code{plot_Spectrum}
 for plotting the spectra.
 }
-\note{
-#
-}
 \examples{
 # Import ASCII text file
 file1 <- system.file("extdata", "coral.txt", package = "ESR")

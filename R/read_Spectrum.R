@@ -13,7 +13,6 @@
 #' @return Returns a terminal output. In addition an
 #' \code{\link{R6Class}} object is returned. \cr
 #' @export
-#' @note #
 #' @author Christoph Burow, University of Cologne (Germany)
 #' @seealso \code{\link{read.table}}, \code{\link{readBin}}, \code{\link{read.csv}}
 #' @references In progress
