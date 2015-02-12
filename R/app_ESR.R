@@ -26,6 +26,8 @@ app_ESR <- function(app, ...) {
   if (!app %in% valid_apps) 
     return(message(paste0("Invalid app name: ", app, " \n Valid options are: ", paste(valid_apps, collapse = ", "))))
   
-  runApp(system.file(paste0("shiny/",app), package = "ESR"), display.mode = "showcase", ...)
+  display.mode <- ifelse(app == "converter", "showcase", "normal")
+  
+  runApp(system.file(paste0("shiny/",app), package = "ESR"), display.mode = display.mode, ...)
   
 }
