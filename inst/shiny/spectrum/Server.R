@@ -180,7 +180,7 @@ shinyServer(function(input, output, session) {
 #     }
 
 
-  ylim.plot<- plot_Spectrum(input.data = data,
+  ylim.plot<- plot_Spectrum(data = data,
                                difference = input$diff,
                                smooth.spline = input$useSpline, 
                                smooth.spline.df = input$splinedf,
@@ -274,7 +274,7 @@ output$main_plot <- renderPlot({
   )
   
   
-  plot_Spectrum(input.data = data,
+  plot_Spectrum(data = data,
                    difference = input$diff,
                    smooth.spline = input$useSpline, 
                    smooth.spline.df = input$splinedf,
@@ -335,7 +335,7 @@ output$main_plot <- renderPlot({
                    family = input$fontfamily)
       }
       
-      plot_Spectrum(input.data = data,
+      plot_Spectrum(data = data,
                        difference = input$diff,
                        smooth.spline = input$useSpline, 
                        smooth.spline.df = input$splinedf,
@@ -435,7 +435,7 @@ output$gvis_plot<- renderGvis({
   }
   
   if(input$diff == TRUE || input$useSpline == TRUE) {
-    temp<- plot_Spectrum(input.data = data,difference = input$diff,smooth.spline = input$useSpline,
+    temp<- plot_Spectrum(data = data,difference = input$diff,smooth.spline = input$useSpline,
                             smooth.spline.df = input$splinedf,auto.shift = input$shift,
                             output.console = FALSE,output.plot = FALSE)
     
@@ -489,7 +489,7 @@ output$peaks<- renderGvis({
   }
   
   if(input$findpeaks == TRUE && is(data, "RLum.Data.Curve") == FALSE) {
-    peak.data<- plot_Spectrum(input.data = data,
+    peak.data<- plot_Spectrum(data = data,
                                  difference = input$diff,
                                  smooth.spline = input$useSpline, 
                                  smooth.spline.df = input$splinedf,
