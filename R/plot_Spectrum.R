@@ -51,7 +51,6 @@
 #' @note In progress
 #' @author Christoph Burow, University of Cologne (Germany)
 #' @seealso \code{\link{plot}}
-#' @references In progress
 #' @examples
 #' 
 #' 
