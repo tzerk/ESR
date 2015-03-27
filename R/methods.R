@@ -8,7 +8,7 @@ differential <- function(x, order, ...) {
   }
   until <- nrow(x) - order
   c <- attributes(x)$spectrum
-  x <- x[1:until] # TODO: This causes x to loose its attributes
+  x <- x[1:until, ] # TODO: This causes x to loose its attributes
   if (!is.null(c)) attr(x, "spectrum") <- c
   x$y <- d
   class(x) <- c("ESR.Spectrum", class(x))
