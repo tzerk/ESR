@@ -2,7 +2,6 @@
 % Please edit documentation in R/ESR-package.R
 \docType{package}
 \name{ESR-package}
-\alias{ESR}
 \alias{ESR-package}
 \title{Collection of functions for Electron Spin Resonance Dating data analysis}
 \description{

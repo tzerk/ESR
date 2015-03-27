@@ -9,16 +9,12 @@
 #' \tab GPL-3\cr}
 #' 
 #' @name ESR-package
-#' @aliases ESR-package ESR
+#' @aliases ESR-package
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
 #' @import Luminescence boot R6 data.table shiny googleVis
 NULL
-
-
-
-
 
 #' Synthetic ESR equivalent dose data set
 #' 
@@ -39,7 +35,6 @@ NULL
 #' 
 NULL
 
-
 #' ESR spectra of a mollusc and the dpph standard
 #' 
 #' ESR spectra of a mollusc from the foothills of the Alps and the dpph
@@ -59,5 +54,3 @@ NULL
 #' data(ExampleData.ESRspectra, envir = environment())
 #' 
 NULL
-
-
