@@ -80,8 +80,8 @@ as.ESR.Spectrum <- function(x) {
     stop("Please provide an object of class data.frame or data.table", 
          call. = FALSE)
   if (ncol(x) != 2L)
-    stop(paste0("Unexpected number of columns: ", ncol(x),". \n Please provide a two column data.frame or data.table.",
-                , call. = FALSE))
+    stop(paste0("Unexpected number of columns: ", ncol(x),". \n Please provide a two column data.frame or data.table."),
+         call. = FALSE)
   
   # User argument as origin
   origin <- deparse(substitute(x))
