@@ -115,9 +115,6 @@ plot_Spectrum(ExampleData.ESRspectra$Ba01,
 \author{
 Christoph Burow, University of Cologne (Germany)
 }
-\references{
-In progress
-}
 \seealso{
 \code{\link{plot}}
 }
