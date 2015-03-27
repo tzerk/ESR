@@ -54,7 +54,7 @@
 #' 30 (1), pp 1-8.
 #' @examples
 #' 
-#' 
+#' \dontrun{
 #' ##load example data
 #' data(ExampleData.De, envir = environment())
 #' 
@@ -64,7 +64,7 @@
 #'                fit.weights = 'prop', 
 #'                show.grid = TRUE, 
 #'                output.console = FALSE)
-#' 
+#' }
 #' 
 #' @export calc_DePlateau
 calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal", 

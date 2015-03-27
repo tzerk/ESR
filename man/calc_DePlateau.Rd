@@ -62,6 +62,7 @@ supported. Fitting of two exponentials or an exponential with a linear term
 may be implemented in a future release.
 }
 \examples{
+\dontrun{
 ##load example data
 data(ExampleData.De, envir = environment())
 
@@ -71,6 +72,7 @@ calc_DePlateau(input.data = ExampleData.De,
                fit.weights = 'prop',
                show.grid = TRUE,
                output.console = FALSE)
+}
 }
 \author{
 Christoph Burow, University of Cologne (Germany) Who wrote it
