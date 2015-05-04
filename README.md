@@ -1,5 +1,6 @@
 # ESR
 
+[![Build status](https://ci.appveyor.com/api/projects/status/emdl7is8oa7kh5i0/branch/master?svg=true)](https://ci.appveyor.com/project/tzerk/esr/branch/master)
 [![Build Status](https://travis-ci.org/tzerk/ESR.svg?branch=master)](https://travis-ci.org/tzerk/ESR)
 
 The R package 'ESR' provides a collection of various R functions for electron spin resonance dating data analysis.
