@@ -22,6 +22,10 @@
 #' @param auto.shift \code{\link{logical}} (with default): automatically shift
 #' multiple spectra by their maximum peak. This uses smoothing splines for
 #' better results.
+#' @param shift.method \code{\link{character}} (with default): when \code{integral}
+#' (default) the peaks are shifted by the maximum intensity of the integral.
+#' Alternatively, \code{deriv} can be used to shift the spectra by the minimum of the
+#' first derivative.
 #' @param find.peaks \code{\link{logical}} (with default): find and plot peaks
 #' (\code{TRUE/FALSE}).
 #' @param peak.range \code{\link{integer}} (with default): range of magnetic
@@ -88,7 +92,7 @@
 #' @export plot_Spectrum
 plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE, 
                           smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
-                          auto.shift = FALSE, find.peaks = FALSE, peak.range, peak.threshold = 10, 
+                          auto.shift = FALSE, shift.method = "integral", find.peaks = FALSE, peak.range, peak.threshold = 10, 
                           peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, 
                           ...) {
   
@@ -108,21 +112,35 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   } 
   else if (is.list(data)) {
     # TODO: check if all list items are dataframes
+    
+    if (inherits(data[[1]], "ESR.Spectrum")) {
+      names <- as.character(unlist(lapply(data, function(x) x$originator)))
+      data <- lapply(data, function(x) as.data.frame(x$data))
+      names(data) <- names
+    }
   }
-  else if ("ESR.Spectrum" %in% class(data)) {
-    data <- list(as.data.frame(data$data))
-  }
+
   else stop("\n [plot_Spectrum] >> data has to be of type data.fame, data.table list or ESR.Spectrum!")
   
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ## ==========================================================================##
-  
+
   # save column names for legend
-  colnames <- colnames(data)
+  if (length(data) > 1)
+    colnames <- names(data)
   
+  # if list is unnamed, grep colnames; else, disable legend and warn user
+  if (is.null(colnames))
+    colnames <- colnames(data)
+
+  if (is.null(colnames)) {
+    message("Warning: plotting the legend requires a named list!")
+  }
+    
+    
   # difference
-  if (difference == TRUE) {
+  if (difference == TRUE || auto.shift == TRUE) {
     temp <- lapply(data, function(x) {
       diff(x[, 2])
     })
@@ -259,7 +277,10 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   if ("legend" %in% names(extraArgs)) {
     legend <- extraArgs$legend
   } else {
-    legend <- TRUE
+    if (is.null(colnames))
+      legend <- FALSE
+    else
+      legend <- TRUE
   }
   
   if ("legend.pos" %in% names(extraArgs)) {
@@ -332,8 +353,13 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     # pos.peak.max<- unlist( lapply(spline, function(x) {
     # x[[1]][which.max(x[[2]])] }) )
     
+    if (shift.method == "integral")
+      shifter <- integrand
+    else if (shift.method == "deriv")
+      shifter <- deriv_one
+    
     # shift peaks by maximum peak of integrand
-    pos.peak.max <- unlist(lapply(integrand, function(x) {
+    pos.peak.max <- unlist(lapply(shifter, function(x) {
       x[[1]][which.max(x[[2]])]
     }))
     
