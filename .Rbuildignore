@@ -7,3 +7,4 @@ testthat.R$
 test-plot_Spectrum.R$
 UML_class_ESR_package.vsdx$
 appveyor.yml$
+.travis.yml$
