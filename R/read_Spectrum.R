@@ -50,6 +50,7 @@ read_Spectrum <- function(file, ...) {
   verbose <- ifelse("verbose" %in% names(extraArgs), extraArgs$verbose, TRUE)
   trace <- ifelse("trace" %in% names(extraArgs), extraArgs$trace, TRUE)
   records <- ifelse("n" %in% names(extraArgs), extraArgs$n, 1024L)
+  sweep_width <- ifelse("sw" %in% names(extraArgs), extraArgs$sw, NA)
   
   ## FUNCTIONS ----
   check_type <- function(f) {
@@ -70,9 +71,11 @@ read_Spectrum <- function(file, ...) {
   get_xval <- function(par, cf, sw, div = 1) {
     if (!is.null(par)) {
       center_field <- as.numeric(par[par==cf, 2])
-      sweep_width <- as.numeric(par[par==sw, 2]) / div
+      if (is.na(sweep_width))
+        sweep_width <- as.numeric(par[par==sw, 2]) / div
       start <- center_field - sweep_width
       end <- center_field + sweep_width
+      print(paste(center_field, sweep_width))
       
       xval <- seq(from = start, to = end, by = (end - start) / (records - 1))
     } else {
@@ -175,7 +178,8 @@ read_Spectrum <- function(file, ...) {
       obj[[i]] <- ESR.Spectrum$new()
       obj[[i]]$set_data(res[[i]][[1]])
       obj[[i]]$set_par(res[[i]][[2]])
-      obj[[i]]$set_origin(files[i])
+      origin <- ifelse(grepl("/", files[i]), gsub(".*/(?!.*/)", "", files[i], perl = TRUE), files[i])
+      obj[[i]]$set_origin(origin)
     }
   }
   
@@ -186,7 +190,8 @@ read_Spectrum <- function(file, ...) {
     obj <- ESR.Spectrum$new()
     obj$set_data(df$data)
     obj$set_par(df$par)
-    obj$set_origin(file)
+    origin <- ifelse(grepl("/", file), gsub(".*/(?!.*/)", "", file, perl = TRUE), file)
+    obj$set_origin(origin)
   }
   
   ## CONSOLE ----
