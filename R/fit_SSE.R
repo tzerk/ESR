@@ -412,7 +412,7 @@ fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE,
       # insert subtitle with information on De, n and fit method
       mtext(substitute(D[e] == De, list(De = paste(abs(De.solve), 
                                                    "+/-", De.solve.error, "Gy", " | n =", length(input.data$x), 
-                                                   " | fit: SSE"))), side = 3, line = 0, cex = 0.8)
+                                                   " | fit: SSE"))), side = 3, line = -1, cex = 0.8)
       
       # plot vertical dashed line at x=0 par(new=TRUE)
       v.ylim <- pretty(input.data[, 2])
