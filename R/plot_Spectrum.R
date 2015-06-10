@@ -110,6 +110,13 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     
     data <- list(data)
   } 
+  
+  else if (inherits(data, "ESR.Spectrum")) {
+    name <- as.character(data$originator)
+    data <- list(as.data.frame(data$data))
+    names(data) <- name
+  }
+  
   else if (is.list(data)) {
     # TODO: check if all list items are dataframes
     
