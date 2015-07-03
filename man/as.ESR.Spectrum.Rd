@@ -2,12 +2,9 @@
 % Please edit documentation in R/generics.R
 \name{as.ESR.Spectrum}
 \alias{as.ESR.Spectrum}
-\alias{is.ESR.Spectrum}
 \title{Coercion from and to ESR.Spectrum}
 \usage{
 as.ESR.Spectrum(x)
-
-is.ESR.Spectrum(x)
 }
 \arguments{
 \item{x}{an object to coerce to an \code{ESR.Spectrum}}

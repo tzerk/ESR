@@ -97,13 +97,6 @@ as.ESR.Spectrum <- function(x) {
   return(obj)
 }
 
-
-#' @export
-#' @rdname as.ESR.Spectrum
-is.ESR.Spectrum <- function(x) {
-  inherits(x, "ESR.Spectrum")
-}
-
 #' @export
 # as.data.frame method for objects of class ESR.Spectrum
 as.data.frame.ESR.Spectrum <- function(x, ...) {

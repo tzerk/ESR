@@ -1,3 +1,11 @@
+## -------------
+## A function to describe the ESR spectra based on the attributes of the $data
+## slot of the ESR.Spectrum object. All ESR.Spectrum methods that modify the
+## spectrum (e.g., get_diff and get_spline) add a new attribute to the data.
+## If the data has attributes "spline" and "diff" this function returns the 
+## string "smoothed 1. derivative". It is currently only used when calling 
+## the generic plot() on ESR.Spectrum objects for argument 'main'.
+## -------------
 describe_spectrum <- function(x) {
   str <- vector("character", length(x))
   for (i in seq_along(x)) {

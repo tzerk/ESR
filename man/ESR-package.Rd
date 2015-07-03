@@ -10,7 +10,7 @@ Electron Spin Resonance Dating data analysis.
 }
 \details{
 \tabular{ll}{ Package: \tab ESR\cr Type: \tab Package\cr Version: \tab
-1.2.4\cr Date: \tab 2014-08-29\cr Author: \tab Christoph Burow \cr
+1.2.4\cr Date: \tab 2015-07-03\cr Author: \tab Christoph Burow \cr
 Maintainer: \tab Christoph Burow <christoph.burow@uni-koeln.de>\cr License:
 \tab GPL-3\cr}
 }

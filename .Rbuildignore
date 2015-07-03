@@ -6,5 +6,6 @@ README.md$
 testthat.R$
 test-plot_Spectrum.R$
 UML_class_ESR_package.vsdx$
+imports_for_undefined_globals.R$
 appveyor.yml$
 .travis.yml$

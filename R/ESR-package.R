@@ -4,7 +4,7 @@
 #' Electron Spin Resonance Dating data analysis.
 #' 
 #' \tabular{ll}{ Package: \tab ESR\cr Type: \tab Package\cr Version: \tab
-#' 1.2.4\cr Date: \tab 2014-08-29\cr Author: \tab Christoph Burow \cr
+#' 1.2.4\cr Date: \tab 2015-07-03\cr Author: \tab Christoph Burow \cr
 #' Maintainer: \tab Christoph Burow <christoph.burow@@uni-koeln.de>\cr License:
 #' \tab GPL-3\cr}
 #' 
@@ -13,7 +13,7 @@
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
-#' @import Luminescence boot R6 data.table shiny googleVis
+#' @import Luminescence boot R6 data.table shiny googleVis graphics grDevices stats utils
 NULL
 
 #' Synthetic ESR equivalent dose data set
