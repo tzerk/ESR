@@ -19,6 +19,7 @@ Imports:
     R6,
     data.table,
     shiny,
+    ggplot2,
     googleVis,
     graphics,
     grDevices,
