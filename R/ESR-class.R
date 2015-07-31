@@ -174,7 +174,7 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                               if (any(H<=2048))
                                 return(message("Invalid or no magnetic field data!"))
                             }
-                            invisible(gval(v, H, x))
+                            invisible(get_gvalues(v, H, x))
                           },
                           get_diff = function(data = self$data, order = 1, ...) {
                             invisible(get_diff(data, order, ...))
