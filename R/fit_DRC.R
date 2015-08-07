@@ -26,6 +26,9 @@
 #' with two columns for x=Dose, y=ESR.intensity. Optional: a third column
 #' containing individual ESR intensity errors can be provided.
 #' 
+#' @param model \code{\link{character}} (with default): Currently implemented
+#' models: single-saturating exponential (\code{"EXP"}), linear (\code{"LIN"}).
+#' 
 #' @param fit.weights \code{\link{logical}} (with default): option whether the
 #' fitting is done with equal weights (\code{'equal'}) or weights proportional
 #' to intensity (\code{'prop'}). If individual ESR intensity errors are
@@ -84,7 +87,8 @@
 #' fit_DRC(input.data = ExampleData.De, fit.weights = 'prop')
 #' 
 #' @export fit_DRC
-fit_DRC <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstrap = FALSE, 
+fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal", 
+                    algorithm = "LM", bootstrap = FALSE, 
                     bootstrap.replicates = 999, plot = FALSE, 
                     ...) {
   
@@ -225,46 +229,61 @@ fit_DRC <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
   ## FITTING OF THE SINGLE SATURATING EXPONENTIAL
   ## ==========================================================================##
   
-  # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
-  nls.fit <- function(x) {
-    nls.bs.res <- try(nls(EXP, data = x, 
-                          start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                          algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
+  if (model == "EXP") {
+    # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
+    nls.fit <- function(x) {
+      nls.bs.res <- try(nls(EXP, data = x, 
+                            start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                            algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
+    }
+    #
+    nlsLM.fit <- function(x) {
+      nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
+                                      start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                                      control = minpack.lm::nls.lm.control(maxiter = 500))
+    }
+    
+    if (algorithm == "port") fit <- nls.fit(input.data)
+    else if (algorithm == "LM") fit <- nlsLM.fit(input.data)
+    
+    # retrieve fitting results
+    nls.par <- try(summary(fit)$parameters, silent = TRUE)
+    
+    if (class(fit) == "try-error") {
+      nls.par <- NA
+    }
   }
-  #
-  nlsLM.fit <- function(x) {
-    nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
-                                    start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                                    control = minpack.lm::nls.lm.control(maxiter = 500))
+  
+  if (model == "LIN") {
+    fit <- lm(input.data[ ,2] ~ input.data[ ,1])
+    lm.coef <- as.numeric(coef(fit))
+    De.solve <- round(-lm.coef[1] / lm.coef[2], 2)
+    CI <- confint(fit, level = 0.67)
+    De.solve.error <- round(as.numeric(dist(CI[2, ]) / 2), 2)
+    d0 <- NA
+    d0.error <- NA
   }
-  
-  if (algorithm == "port") fit <- nls.fit(input.data)
-  else if (algorithm == "LM") fit <- nlsLM.fit(input.data)
-  
-  # retrieve fitting results
-  nls.par <- try(summary(fit)$parameters, silent = TRUE)
-  
-  if (class(fit) == "try-error") {
-    nls.par <- NA
-  }
-  
   
   ## ==========================================================================##
   ## EQUIVALENT DOSE CALCULATION
   ## ==========================================================================##
   
-  # calculate De by solving SSE for x
-  De.solve <- round(-c - b * log(1 - 0/a), digits = 2)
-  d0 <- round(nls.par["b", "Estimate"], 0)
-  
-  # obtain DE error and characteristic saturation dose D0
-  if (class(fit) != "try-error") {
-    CI <- confint(fit, level = 0.67)
-    De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
-    d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
-  } else {
-    De.solve.error <- NA
-    d0 <- NA
+  if (model == "EXP") {
+    # calculate De by solving SSE for x
+    De.solve <- round(-c - b * log(1 - 0/a), digits = 2)
+    
+    # obtain DE error and characteristic saturation dose D0
+    if (class(fit) != "try-error") {
+      d0 <- round(nls.par["b", "Estimate"], 0)
+      CI <- confint(fit, level = 0.67)
+      De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
+      d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
+    } else {
+      De.solve.error <- NA
+      d0 <- NA
+      d0.error <- NA
+      Rsqr <- NA
+    }
   }
   
   ## ==========================================================================##

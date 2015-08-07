@@ -4,13 +4,17 @@
 \alias{fit_DRC}
 \title{Fit and plot a dose response curve for ESR data (ESR intensity against dose)}
 \usage{
-fit_DRC(input.data, fit.weights = "equal", algorithm = "LM",
-  bootstrap = FALSE, bootstrap.replicates = 999, plot = FALSE, ...)
+fit_DRC(input.data, model = "EXP", fit.weights = "equal",
+  algorithm = "LM", bootstrap = FALSE, bootstrap.replicates = 999,
+  plot = FALSE, ...)
 }
 \arguments{
 \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame
 with two columns for x=Dose, y=ESR.intensity. Optional: a third column
 containing individual ESR intensity errors can be provided.}
+
+\item{model}{\code{\link{character}} (with default): Currently implemented
+models: single-saturating exponential (\code{"EXP"}), linear (\code{"LIN"}).}
 
 \item{fit.weights}{\code{\link{logical}} (with default): option whether the
 fitting is done with equal weights (\code{'equal'}) or weights proportional
