@@ -43,10 +43,7 @@
 #' @param bootstrap.replicates \code{\link{numeric}} (with default): amount of
 #' bootstrap replicates.
 #' 
-#' @param output.console \code{\link{logical}} (with default): plot console
-#' output (\code{TRUE/FALSE}).
-#' 
-#' @param output.plot \code{\link{logical}} (with default): plot output
+#' @param plot \code{\link{logical}} (with default): plot output
 #' (\code{TRUE/FALSE}).
 #' 
 #' @param \dots further arguments
@@ -80,17 +77,15 @@
 #' (1), pp 1-8.
 #' @examples
 #' 
-#' 
 #' ##load example data
 #' data(ExampleData.De, envir = environment())
 #' 
 #' ##plot ESR sprectrum and peaks
-#' fit_SSE(input.data = ExampleData.De, fit.weights = 'prop')
+#' fit_DRC(input.data = ExampleData.De, fit.weights = 'prop')
 #' 
-#' 
-#' @export fit_SSE
-fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstrap = FALSE, 
-                    bootstrap.replicates = 999, output.console = TRUE, output.plot = TRUE, 
+#' @export fit_DRC
+fit_DRC <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstrap = FALSE, 
+                    bootstrap.replicates = 999, plot = FALSE, 
                     ...) {
   
   
@@ -101,8 +96,8 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
   ## check if provided data fulfill the requirements
   
   # 1. check if input.data is data.frame
-  if (is.data.frame(input.data) == FALSE) {
-    stop("\n [fit_SSE] >> input.data has to be of type data.fame!")
+  if (!is.data.frame(input.data)) {
+    stop("\n [fit_DRC] >> input.data has to be of type data.fame!")
   }
   
   # 2. very if data frame has two or three columns
@@ -112,9 +107,20 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
     stop(domain = NA)
   }
   
-  
   #### satisfy R CMD check Notes
   x <- NULL
+  
+  ## ==========================================================================##
+  ## CHECK ... ARGUMENTS
+  ## ==========================================================================##
+  
+  extraArgs <- list(...)
+  
+  verbose <- if ("verbose" %in% names(extraArgs)) {
+    extraArgs$verbose
+  } else {
+    TRUE
+  }
   
   ## ==========================================================================##
   ## SET FUNCTIONS FOR FITTING & PREPARE INPUT DATA
@@ -249,21 +255,31 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
   
   # calculate De by solving SSE for x
   De.solve <- round(-c - b * log(1 - 0/a), digits = 2)
+  d0 <- round(nls.par["b", "Estimate"], 0)
   
   # obtain DE error and characteristic saturation dose D0
   if (class(fit) != "try-error") {
-    De.solve.error <- round(nls.par["c", "Std. Error"], 2)
-    d0 <- round(nls.par["b", "Estimate"], 0)
+    CI <- confint(fit, level = 0.67)
+    De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
+    d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
   } else {
     De.solve.error <- NA
     d0 <- NA
   }
   
+  ## ==========================================================================##
+  ## DETERMINE FIT QUALITY
+  ## ==========================================================================##
+  if (class(fit) != "try-error") {
+    RSS.p <- sum(residuals(fit)^2)
+    TSS <- sum((input.data[, 2] - mean(input.data[, 2]))^2)
+    Rsqr <- 1-RSS.p/TSS
+  }
   
   ## ==========================================================================##
   ## BOOTSTRAP
   ## ==========================================================================##
-  if (bootstrap == TRUE) {
+  if (bootstrap) {
     
     nls.bs <- function(bs.data, i, FUN) {
       
@@ -295,7 +311,7 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
   ## CONSOLE OUTPUT
   ## ==========================================================================##
   
-  if (output.console == TRUE) 
+  if (verbose) 
   {
     
     # save weighting method in a new variable for nicer output
@@ -310,18 +326,20 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
     }
     
     # final console output
-    cat("\n [fit_SSE]")
+    cat("\n [fit_DRC]")
     cat(paste("\n\n ---------------------------------------------------------"))
-    cat(paste("\n number of datapoints       :", length(input.data$x)))
-    cat(paste("\n maximum additive dose (Gy) :", max(input.data$x)))
-    cat(paste("\n Error weighting            :", weight.method))
-    cat(paste("\n Satuation dose D0 (Gy)     :", d0))
-    cat(paste("\n De (Gy)                    :", abs(De.solve)))
-    cat(paste("\n De error (Gy)              :", De.solve.error))
+    cat(paste("\n number of datapoints         :", length(input.data$x)))
+    cat(paste("\n maximum additive dose (Gy)   :", max(input.data$x)))
+    cat(paste("\n Error weighting              :", weight.method))
+    cat(paste("\n Satuation dose D0 (Gy)       :", d0))
+    cat(paste("\n Satuation dose D0 error (Gy) :", d0.error))
+    cat(paste("\n De (Gy)                      :", abs(De.solve)))
+    cat(paste("\n De error (Gy)                :", De.solve.error))
+    cat(paste("\n R^2                          :", round(Rsqr, 4)))
     cat(paste("\n ---------------------------------------------------------\n"))
     
     # results of bootstrapping
-    if (bootstrap == TRUE) {
+    if (bootstrap) {
       cat(paste("\n\n ------------------- BOOTSTRAP RESULTS -------------------"))
       cat(paste("\n Mean (Gy)                  :", round(nls.bs.mean, 
                                                          2)))
@@ -333,142 +351,33 @@ fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstr
     }
   }  #:EndOf output.console
   
-  ## ==========================================================================##
-  ## CHECK ... ARGUMENTS
-  ## ==========================================================================##
-  
-  extraArgs <- list(...)
-  
-  main <- if ("main" %in% names(extraArgs)) {
-    extraArgs$main
-  } else {
-    "Dose response cuve"
-  }
-  
-  xlim <- if ("xlim" %in% names(extraArgs)) {
-    c(extraArgs$xlim[1], extraArgs$xlim[2])
-  } else {
-    c(De.solve + De.solve * 0.5, (max(input.data$x) + max(input.data$x) * 
-                                    0.1))
-  }
-  
-  ylim <- if ("ylim" %in% names(extraArgs)) {
-    c(extraArgs$ylim[1], extraArgs$ylim[2])
-  } else {
-    c(0, max(input.data$y) + max(input.data$y) * 0.1)
-  }
-  
-  xlab <- if ("xlab" %in% names(extraArgs)) {
-    extraArgs$xlab
-  } else {
-    "Dose (Gy)"
-  }
-  
-  ylab <- if ("ylab" %in% names(extraArgs)) {
-    extraArgs$ylab
-  } else {
-    "ESR intensity (a.u.)"
-  }
-  
-  pch <- if ("pch" %in% names(extraArgs)) {
-    extraArgs$pch
-  } else {
-    21
-  }
-  
-  col <- if ("col" %in% names(extraArgs)) {
-    extraArgs$col
-  } else {
-    "black"
-  }
-  
-  
-  ## ==========================================================================##
-  ## PLOTTING
-  ## ==========================================================================##
-  
-  
-  if (output.plot == TRUE) 
-  {
-    
-    # save previous plot parameter and set new ones
-    .pardefault <- par(no.readonly = TRUE)
-    
-    if (bootstrap == TRUE) {
-      
-      jack.after.boot(nls.bs.res, index = 1)
-      
-      layout(matrix(c(1, 3, 2, 3), 2, 2))
-      par(oma = c(0, 4, 0, 4))
-      
-      hist(nls.bs.res$t, breaks = "FD", freq = FALSE, main = "Histogram", 
-           xlab = "Equivalent Dose (Gy)", col = "gray80", border = "gray66")
-      
-      lines(density(na.exclude(nls.bs.res$t)), col = "black", 
-            lwd = 1.5)
-      
-      # plot vertical dashed line at t0
-      abline(v = c(nls.bs.res$t0, mean(na.exclude(nls.bs.res$t)), 
-                   median(na.exclude(nls.bs.res$t))), col = "black", lwd = 1.5, 
-             lty = c(2, 3, 4))
-      
-      
-      legend("topright", legend = c("KDE", "t0", "mean t*", "median t*"), 
-             lty = c(1, 2, 3, 4), bty = "n")
-      
-      qqnorm(nls.bs.res$t)
-      qqline(nls.bs.res$t, lty = 2)
-    }
-    
-    # plot only if fitting was successful
-    if (class(fit) != "try-error") 
-    {
-      
-      # set plot layout
-      par(cex = 1, xaxs = "i", yaxs = "i")
-      
-      # plot input data: ESR intensity vs dose (Gy)
-      plot(input.data[, 1], input.data[, 2], main = main, ylim = ylim, 
-           xlim = xlim, ylab = ylab, xlab = xlab, pch = pch, bty = "n", 
-           col = col, lab = c(10, 5, 7))
-      
-      # insert subtitle with information on De, n and fit method
-      mtext(substitute(D[e] == De, list(De = paste(abs(De.solve), 
-                                                   "+/-", De.solve.error, "Gy", " | n =", length(input.data$x), 
-                                                   " | fit: SSE"))), side = 3, line = -1, cex = 0.8)
-      
-      # plot vertical dashed line at x=0 par(new=TRUE)
-      v.ylim <- pretty(input.data[, 2])
-      points(x = c(0, 0), y = c(0, v.ylim[length(v.ylim)]), 
-             col = "black", type = "l", lty = "1111AA")
-      
-      # plot fitted curve through data
-      curve(EXP, lwd = 1.5, col = "black", 
-            add = TRUE, lty = 1)
-      
-      ## restore previous plot parameters
-      par(.pardefault)
-      
-    }  #:EndOf output.plot
-    
-    
-    
-  }  #::EndOf fit_SSE()
   
   ## ==========================================================================##
   ## RETURN VALUES
   ## ==========================================================================##
   
   # create data frame for output
-  if (bootstrap == FALSE) {
+  if (!bootstrap) {
     nls.bs.res <- NA
   }
   
-  output <- try(data.frame(De = abs(De.solve), De.Error = De.solve.error, 
-                           d0 = d0, n = length(input.data$x), weigths = fit.weights), silent = TRUE)
+  output <- try(data.frame(De = abs(De.solve), 
+                           De.Error = De.solve.error, 
+                           d0 = d0,
+                           d0.error = d0.error,
+                           n = length(input.data$x), 
+                           weights = fit.weights),
+                silent = TRUE)
+  
+  results <- list(data = input.data,
+                  output = output, 
+                  fit = fit, 
+                  bootstrap = nls.bs.res)
+  
+  if (plot) try(plot_DRC(results, ...))
   
   # return output data.frame and nls.object fit
-  invisible(list(output = output, fit = fit, bootstrap = nls.bs.res))
+  invisible(results)
   
   
 }

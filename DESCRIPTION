@@ -19,6 +19,7 @@ Imports:
     R6,
     data.table,
     shiny,
+    minpack.lm,
     ggplot2,
     googleVis,
     graphics,
@@ -34,9 +35,10 @@ Collate:
     'app_ESR.R'
     'calc_DePlateau.R'
     'find_peaks.R'
-    'fit_SSE.R'
+    'fit_DRC.R'
     'utils.R'
     'generics.R'
+    'plot_DRC.R'
     'plot_Spectrum.R'
     'read_Spectrum.R'
     'zzz.R'
