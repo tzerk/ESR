@@ -21,22 +21,37 @@
 #' results is shown in a histogram, while a \code{\link{qqnorm}} plot is
 #' generated to give indications for (non-)normal distribution of the data.
 #' 
+#' 
 #' @param input.data \code{\link{data.frame}} (\bold{required}): data frame
 #' with two columns for x=Dose, y=ESR.intensity. Optional: a third column
 #' containing individual ESR intensity errors can be provided.
+#' 
 #' @param fit.weights \code{\link{logical}} (with default): option whether the
 #' fitting is done with equal weights (\code{'equal'}) or weights proportional
 #' to intensity (\code{'prop'}). If individual ESR intensity errors are
 #' provided, these can be used as weights by using \code{'error'}.
+#' 
+#' @param algorithm \code{\link{character}} (with default): specify the applied
+#' algorithm used when fitting non-linear models. If \code{'port'} the 'nl2sol'
+#' algorithm from the Port library is used. The default (\code{'LM'}) uses
+#' the implementation of the Levenberg-Marquardt algorithm from
+#' the \code{'minpack.lm'} package.
+#' 
 #' @param bootstrap \code{\link{logical}} (with default): generate replicates
 #' of the input data for a nonparametric bootstrap.
+#' 
 #' @param bootstrap.replicates \code{\link{numeric}} (with default): amount of
 #' bootstrap replicates.
+#' 
 #' @param output.console \code{\link{logical}} (with default): plot console
 #' output (\code{TRUE/FALSE}).
+#' 
 #' @param output.plot \code{\link{logical}} (with default): plot output
 #' (\code{TRUE/FALSE}).
+#' 
 #' @param \dots further arguments
+#' 
+#' 
 #' @return Returns terminal output and a plot. In addition, a list is returned
 #' containing the following elements:
 #' 
@@ -74,7 +89,7 @@
 #' 
 #' 
 #' @export fit_SSE
-fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE, 
+fit_SSE <- function(input.data, fit.weights = "equal", algorithm = "LM", bootstrap = FALSE, 
                     bootstrap.replicates = 999, output.console = TRUE, output.plot = TRUE, 
                     ...) {
   
@@ -114,9 +129,7 @@ fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE,
   }
   
   ## set EXP function for fitting
-  fit.functionEXP <- function(a, b, c, x) {
-    a * (1 - exp(-(x + c)/b))
-  }
+  EXP <- y ~ a * (1 - exp(-(x + c)/b))
   
   
   ## ==========================================================================##
@@ -159,10 +172,14 @@ fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE,
     b <- b.MC[i]
     c <- c.MC[i]
     
-    fit <- try(nls(y ~ fit.functionEXP(a, b, c, x), data = input.data, 
-                   start = c(a = a, b = b, c = c), trace = FALSE, algorithm = "port", 
-                   lower = c(a = 0, b > 0, c = 0), nls.control(maxiter = 100, 
-                                                               warnOnly = FALSE, minFactor = 1/2048)  #increase max. iterations
+    fit <- try(nls(EXP, 
+                   data = input.data, 
+                   start = c(a = a, b = b, c = c), 
+                   trace = FALSE, algorithm = "port", 
+                   lower = c(a = 0, b > 0, c = 0),
+                   nls.control(maxiter = 100, 
+                               warnOnly = FALSE, 
+                               minFactor = 1/2048)  #increase max. iterations
     ), silent = TRUE)
     
     if (class(fit) != "try-error") {
@@ -204,13 +221,19 @@ fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE,
   
   # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
   nls.fit <- function(x) {
-    nls.bs.res <- try(nls(y ~ fit.functionEXP(a, b, c, x), data = x, 
+    nls.bs.res <- try(nls(EXP, data = x, 
                           start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
                           algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
   }
+  #
+  nlsLM.fit <- function(x) {
+    nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
+                                    start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                                    control = minpack.lm::nls.lm.control(maxiter = 500))
+  }
   
-  fit <- nls.fit(input.data)
-  
+  if (algorithm == "port") fit <- nls.fit(input.data)
+  else if (algorithm == "LM") fit <- nlsLM.fit(input.data)
   
   # retrieve fitting results
   nls.par <- try(summary(fit)$parameters, silent = TRUE)
@@ -420,7 +443,7 @@ fit_SSE <- function(input.data, fit.weights = "equal", bootstrap = FALSE,
              col = "black", type = "l", lty = "1111AA")
       
       # plot fitted curve through data
-      curve(fit.functionEXP(a, b, c, x), lwd = 1.5, col = "black", 
+      curve(EXP, lwd = 1.5, col = "black", 
             add = TRUE, lty = 1)
       
       ## restore previous plot parameters
