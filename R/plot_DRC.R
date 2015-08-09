@@ -46,7 +46,7 @@ plot_DRC <- function(object, ...) {
   
   if (inherits(object$bootstrap, "boot")) {
     
-    jack.after.boot(object$bootstrap, index = 1)
+    # jack.after.boot(object$bootstrap, index = 1)
     
     layout(matrix(c(1, 3, 2, 3), 2, 2))
     par(oma = c(0, 4, 0, 4))
@@ -84,7 +84,7 @@ plot_DRC <- function(object, ...) {
     # insert subtitle with information on De, n and fit method
     mtext(substitute(D[e] == De, list(De = paste(abs(-object$output$De), 
                                                  "+/-", object$output$De.Error, "Gy", " | n =", length(object$data$x), 
-                                                 " | fit: SSE"))), side = 3, line = 0.5, cex = 0.7)
+                                                 " | fit: ", object$output$model))), side = 3, line = 0.5, cex = 0.7)
     
     # plot vertical dashed line at x=0 par(new=TRUE)
     v.ylim <- pretty(object$data[, 2])
@@ -93,9 +93,15 @@ plot_DRC <- function(object, ...) {
     
     # plot fitted curve through data
     # curve(EXP, lwd = 1.5, col = "black", add = TRUE, lty = 1)
-    newX <- seq(-object$output$De, max(object$data[ ,1]), length.out = 1000)
-    newY <- predict(object$fit, list(x = newX))
-    lines(newX, newY)
+    if (object$output$model == "EXP") {
+      newX <- seq(-object$output$De, max(object$data[ ,1]), length.out = 1000)
+      newY <- predict(object$fit, list(x = newX))
+      lines(newX, newY)
+    }
+    if (object$output$model == "LIN") {
+      abline(object$fit)
+    }
+    
     
     ## restore previous plot parameters
     par(.pardefault)

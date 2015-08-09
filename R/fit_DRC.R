@@ -229,20 +229,21 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   ## FITTING OF THE SINGLE SATURATING EXPONENTIAL
   ## ==========================================================================##
   
+  
+  # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
+  nls.fit <- function(x) {
+    nls.bs.res <- try(nls(EXP, data = x, 
+                          start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                          algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
+  }
+  #
+  nlsLM.fit <- function(x) {
+    nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
+                                    start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                                    control = minpack.lm::nls.lm.control(maxiter = 500))
+  }
+  
   if (model == "EXP") {
-    # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
-    nls.fit <- function(x) {
-      nls.bs.res <- try(nls(EXP, data = x, 
-                            start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                            algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
-    }
-    #
-    nlsLM.fit <- function(x) {
-      nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
-                                      start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                                      control = minpack.lm::nls.lm.control(maxiter = 500))
-    }
-    
     if (algorithm == "port") fit <- nls.fit(input.data)
     else if (algorithm == "LM") fit <- nlsLM.fit(input.data)
     
@@ -258,7 +259,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     fit <- lm(input.data[ ,2] ~ input.data[ ,1])
     lm.coef <- as.numeric(coef(fit))
     De.solve <- round(-lm.coef[1] / lm.coef[2], 2)
-    CI <- confint(fit, level = 0.67)
+    CI <- confint(fit, level = 0.95)
     De.solve.error <- round(as.numeric(dist(CI[2, ]) / 2), 2)
     d0 <- NA
     d0.error <- NA
@@ -303,13 +304,20 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     nls.bs <- function(bs.data, i, FUN) {
       
       d <- bs.data[i, ]
-      nls.bs.fit <- nls.fit(d)
-      nls.bs.par <- try(summary(nls.bs.fit)$parameters, silent = TRUE)
       
-      if (class(nls.bs.fit) == "try-error") {
-        de <- NA
-      } else {
-        de <- nls.bs.par["c", "Estimate"]
+      if (model == "EXP")  {
+        nls.bs.fit <- nls.fit(d)
+        nls.bs.par <- try(summary(nls.bs.fit)$parameters, silent = TRUE)
+        if (class(nls.bs.fit) == "try-error") {
+          de <- NA
+        } else {
+          de <- nls.bs.par["c", "Estimate"]
+        }
+      }
+      if (model == "LIN") { 
+        lm.bs.fit <- lm(d[, 2] ~ d[ ,1])
+        lm.coef <- as.numeric(coef(lm.bs.fit))
+        de <- abs(round(-lm.coef[1] / lm.coef[2], 2))
       }
       return(de)
     }
@@ -385,7 +393,8 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
                            d0 = d0,
                            d0.error = d0.error,
                            n = length(input.data$x), 
-                           weights = fit.weights),
+                           weights = fit.weights,
+                           model = model),
                 silent = TRUE)
   
   results <- list(data = input.data,
@@ -397,6 +406,4 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   
   # return output data.frame and nls.object fit
   invisible(results)
-  
-  
 }
