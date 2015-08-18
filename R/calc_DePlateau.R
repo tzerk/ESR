@@ -37,7 +37,7 @@
 #' \item{output}{data frame containing the De (datapoints n, De, De.Error,
 #' max.Dose).}
 #' @export
-#' @note Fitting of the dose response curve using \code{\link{fit_SSE}} is
+#' @note Fitting of the dose response curve using \code{\link{fit_DRC}} is
 #' largely derived from the \code{plot_GrowthCurve} function of the
 #' 'Luminescence' package by Kreutzer et al. (2012).\cr\cr \bold{Fitting
 #' methods} \cr Currently, only fitting of a single saturating exponential is
@@ -45,7 +45,7 @@
 #' may be implemented in a future release.
 #' @author Christoph Burow, University of Cologne (Germany) Who wrote it
 #' @seealso \code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
-#' \code{\link{fit_SSE}}
+#' \code{\link{fit_DRC}}
 #' @references Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of
 #' equivalent dose and error calculation and display in OSL dating: An overview
 #' and some recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
@@ -78,7 +78,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   
   # 1. check if input.data is a data.frame
   if (is.data.frame(input.data) == FALSE) {
-    stop("\n [fit_SSE] >> input.data has to be of type data.fame!")
+    stop("\n [calc_DePlateau] >> input.data has to be of type data.fame!")
   }
   
   # 2. verify if data frame has two or three columns
@@ -123,7 +123,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   pb <- txtProgressBar(min = 0, max = length(input.data[, 1]) - min.DosePoints, 
                        char = "=", style = 3)
   
-  # repeatedly call fit_SSE() while removing highest datapoint after each
+  # repeatedly call fit_DRC() while removing highest datapoint after each
   # run
   for (i in 1:c(length(input.data[, 1]) - min.DosePoints)) {
     
@@ -133,15 +133,15 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
       # temporary container for input.data
       input.temp <- input.data[1:length(input.data[, 1]), ]
       
-      # call fit_SSE() and save De and De.Error to De container
-      De.storage[i, ] <- as.matrix(fit_SSE(input.data = input.temp, 
-                                           fit.weights = fit.weights, output.plot = FALSE, bootstrap = FALSE, 
-                                           output.console = FALSE)$output[1, 1:2])
+      # call fit_DRC() and save De and De.Error to De container
+      De.storage[i, ] <- as.matrix(fit_DRC(input.data = input.temp, 
+                                           fit.weights = fit.weights, plot = FALSE, bootstrap = FALSE, 
+                                           verbose = FALSE)$output[1, 1:2])
       
-      # call fit_SSE() with all datapoints and retrieve nls fit object for
+      # call fit_DRC() with all datapoints and retrieve nls fit object for
       # the dose response curve plot
-      fit <- fit_SSE(input.data = input.data, fit.weights = fit.weights, 
-                     bootstrap = FALSE, output.plot = FALSE, output.console = FALSE)$fit
+      fit <- fit_DRC(input.data = input.data, fit.weights = fit.weights, 
+                     bootstrap = FALSE, plot = FALSE, verbose = FALSE)$fit
       
       # update progressbar
       setTxtProgressBar(pb, i)
@@ -150,8 +150,8 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
     # see above: Fit loop for input.data until min.DosePoints is reached
     input.temp <- input.data[1:c(length(input.data[, 1]) - i), ]
     
-    De.storage[i + 1, ] <- as.matrix(fit_SSE(input.data = input.temp, 
-                                             fit.weights = fit.weights, output.plot = FALSE, output.console = FALSE)$output[1, 
+    De.storage[i + 1, ] <- as.matrix(fit_DRC(input.data = input.temp, 
+                                             fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 
                                                                                                                             1:2])
     
     # update progressbar
