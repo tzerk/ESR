@@ -328,9 +328,9 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     
     nls.bs.des <- na.exclude(nls.bs.res$t)
     
-    nls.bs.mean <- mean(nls.bs.des)
-    nls.bs.median <- median(nls.bs.des)
-    nls.bs.sd <- sd(nls.bs.des)
+    nls.bs.mean <- round(mean(nls.bs.des), 2)
+    nls.bs.median <- round(median(nls.bs.des), 2)
+    nls.bs.sd <- round(sd(nls.bs.des), 2)
     
   }
   
@@ -388,13 +388,14 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     nls.bs.res <- NA
   }
   
-  output <- try(data.frame(De = abs(De.solve), 
-                           De.Error = De.solve.error, 
+  output <- try(data.frame(De = ifelse(bootstrap, nls.bs.median, abs(De.solve)), 
+                           De.Error = ifelse(bootstrap, nls.bs.sd, De.solve.error), 
                            d0 = d0,
                            d0.error = d0.error,
                            n = length(input.data$x), 
                            weights = fit.weights,
-                           model = model),
+                           model = model,
+                           rsquared = Rsqr),
                 silent = TRUE)
   
   results <- list(data = input.data,
