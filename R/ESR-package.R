@@ -3,10 +3,13 @@
 #' This package provides various functions developed for the purpose of
 #' Electron Spin Resonance Dating data analysis.
 #' 
-#' \tabular{ll}{ Package: \tab ESR\cr Type: \tab Package\cr Version: \tab
-#' 1.2.4\cr Date: \tab 2015-07-03\cr Author: \tab Christoph Burow \cr
-#' Maintainer: \tab Christoph Burow <christoph.burow@@uni-koeln.de>\cr License:
-#' \tab GPL-3\cr}
+#' \tabular{ll}{ Package: \tab ESR\cr 
+#' Type: \tab Package\cr 
+#' Version: 0.1.0.9031\tab \cr 
+#' Date: \tab 2015-07-03\cr 
+#' Author: \tab Christoph Burow \cr
+#' Maintainer: \tab Christoph Burow <christoph.burow@@uni-koeln.de>\cr 
+#' License: \tab GPL-3\cr}
 #' 
 #' @name ESR-package
 #' @aliases ESR-package
