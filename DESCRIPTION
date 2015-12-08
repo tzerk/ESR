@@ -42,3 +42,4 @@ Collate:
     'plot_Spectrum.R'
     'read_Spectrum.R'
     'zzz.R'
+RoxygenNote: 5.0.1

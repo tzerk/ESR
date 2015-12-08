@@ -140,6 +140,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   
   ## set EXP function for fitting
   EXP <- y ~ a * (1 - exp(-(x + c)/b))
+  TI1 <- y ~  a * ( exp(-(x + c)/b1) - exp(-(x + c)/b2) )
   
   
   ## ==========================================================================##
@@ -226,7 +227,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   
   
   ## ==========================================================================##
-  ## FITTING OF THE SINGLE SATURATING EXPONENTIAL
+  ## FIT: SINGLE SATURATING EXPONENTIAL (SSE)
   ## ==========================================================================##
   
   
@@ -255,6 +256,10 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     }
   }
   
+  ## ==========================================================================##
+  ## FIT: LINEAR
+  ## ==========================================================================##
+  
   if (model == "LIN") {
     fit <- lm(input.data[ ,2] ~ input.data[ ,1])
     lm.coef <- as.numeric(coef(fit))
@@ -265,6 +270,20 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     d0.error <- NA
   }
   
+  ## ==========================================================================##
+  ## FIT: TI-2 (double exponential with negative term [dose quenching])
+  ## ==========================================================================##
+  
+  # TODO: initial value estimation, fitting, DE solving
+  # REFERENCE: Duval & Guilarte (2015)
+  if (model == "Ti-2") {
+    stop("The Ti-2 model is not yet implemented", call. = FALSE)
+    # fit <- minpack.lm::nlsLM(TI1, data = input.data,
+    #                          start = c(a = 1000, c = 10, b1 = 1000, b2 = 500),
+    #                          trace = TRUE,
+    #                          control = minpack.lm::nls.lm.control(maxiter = 1000))
+  }
+
   ## ==========================================================================##
   ## EQUIVALENT DOSE CALCULATION
   ## ==========================================================================##
@@ -331,7 +350,6 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     nls.bs.mean <- round(mean(nls.bs.des), 2)
     nls.bs.median <- round(median(nls.bs.des), 2)
     nls.bs.sd <- round(sd(nls.bs.des), 2)
-    
   }
   
   ## ==========================================================================##
