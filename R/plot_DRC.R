@@ -105,6 +105,9 @@ plot_DRC <- function(object, interactive = FALSE, ...) {
     lines(newX, newY)
   }
   if (object$output$model == "LIN") {
+    x.intercept <- -coef(object$fit)[1] / coef(object$fit)[2]
+    newX <- seq(x.intercept, max(object$data[ ,1]), length.out = 1000)
+    newY <- coef(object$fit)[2] * newX + coef(object$fit)[1]
     abline(object$fit)
   }
   
@@ -134,6 +137,13 @@ plot_DRC <- function(object, interactive = FALSE, ...) {
     # set layout
     p <- plotly::layout(p, title = paste("<b>",settings$main, "</b></br>", subtitle),
                         margin = list(t = 60),
+                        annotations = list(x = min(newX), y = 0, 
+                                           text = paste0("D<sub>E</sub>(", round(min(newX), 2), ", 0)"), 
+                                           showarrow = TRUE,
+                                           ax = 0,
+                                           ay = -100,
+                                           bgcolor = "grey",
+                                           font = list(color = "white")),
                         yaxis = list(title = settings$ylab, rangemode = "nonnegative"),
                         xaxis = list(title = settings$xlab))
     
