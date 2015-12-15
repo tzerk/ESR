@@ -6,6 +6,8 @@
 #'
 #' @param object \code{\link{list}} (required): a results object returned from
 #' the \code{fit_DRC} function
+#' @param interactive \code{link{logical}} (optional): create an interactive plot
+#' (requires the plotly package)
 #' @param ... further graphical parameters to be passed to \code{plot}
 #'
 #' @return Returns a plot
@@ -18,7 +20,11 @@
 #' obj <- fit_DRC(input.data = ExampleData.De, fit.weights = 'prop')
 #' plot_DRC(obj)
 #' 
-plot_DRC <- function(object, ...) {
+plot_DRC <- function(object, interactive = FALSE, ...) {
+  
+  
+  if (class(object$fit) == "try-error")
+    stop("There is no DRC to plot (fitting failed)", call. = FALSE)
   
   ## ==========================================================================##
   ## ADDITIONAL ARGUMENTS
@@ -31,16 +37,16 @@ plot_DRC <- function(object, ...) {
                    xlab = "Dose (Gy)",
                    ylab = "ESR intensity (a.u.)",
                    pch = 21,
-                   col = "black")
+                   col = "black",
+                   interactive = interactive)
   
   settings <- modifyList(settings, list(...))
-  
-  
   
   ## ==========================================================================##
   ## PLOTTING
   ## ==========================================================================##
   
+  ## BOOSTRAP PLOT ----
   # save previous plot parameter and set new ones
   .pardefault <- par(no.readonly = TRUE)
   
@@ -70,41 +76,66 @@ plot_DRC <- function(object, ...) {
     qqline(object$bootstrap$t, lty = 2)
   }
   
-  # plot only if fitting was successful
-  if (class(object$fit) != "try-error") {
+  ## BASE R PLOT ----
+  # set plot layout
+  par(cex = 1, xaxs = "i", yaxs = "i")
+  
+  # plot input data: ESR intensity vs dose (Gy)
+  plot(object$data[, 1], object$data[, 2], main = settings$main, ylim = settings$ylim, 
+       xlim = settings$xlim, ylab = settings$ylab, xlab = settings$xlab,
+       pch = settings$pch, bty = "n", col = settings$col, lab = c(10, 5, 7))
+  
+  # insert subtitle with information on De, n and fit method
+  subtitle <- list(De = paste(abs(-object$output$De), 
+                              "+/-", object$output$De.Error, "Gy", " | n =", length(object$data$x), 
+                              " | fit: ", object$output$model))
+  
+  mtext(substitute(D[e] == De, subtitle), side = 3, line = 0.5, cex = 0.7)
+  
+  
+  # plot vertical dashed line at x=0 par(new=TRUE)
+  v.ylim <- pretty(object$data[, 2])
+  points(x = c(0, 0), y = c(0, v.ylim[length(v.ylim)]), 
+         col = settings$col, type = "l", lty = "1111AA")
+  
+  # plot fitted curve through data
+  # curve(EXP, lwd = 1.5, col = "black", add = TRUE, lty = 1)
+  if (object$output$model == "EXP") {
+    newX <- seq(-coef(object$fit)[3], max(object$data[ ,1]), length.out = 1000)
+    newY <- predict(object$fit, list(x = newX))
+    lines(newX, newY)
+  }
+  if (object$output$model == "LIN") {
+    abline(object$fit)
+  }
+  
+  
+  ## restore previous plot parameters
+  par(.pardefault)
+  
+  ## INTERACTIVE plotly pkg PLOT ----
+  if (settings$interactive && requireNamespace("plotly", quietly = TRUE)) {
     
-    # set plot layout
-    par(cex = 1, xaxs = "i", yaxs = "i")
+    # data points
+    p <- plotly::plot_ly(obj$data, x = x, y = y, 
+                         name = "aliquot", 
+                         text = paste0("Aliquot #", seq_len(nrow(obj$data))),
+                         mode = "markers", 
+                         showlegend = FALSE)
     
-    # plot input data: ESR intensity vs dose (Gy)
-    plot(object$data[, 1], object$data[, 2], main = settings$main, ylim = settings$ylim, 
-         xlim = settings$xlim, ylab = settings$ylab, xlab = settings$xlab,
-         pch = settings$pch, bty = "n", col = settings$col, lab = c(10, 5, 7))
+    # fitted DRC
+    p <- plotly::add_trace(p, x = newX, y = newY,
+                           text = "",
+                           name = "DRC",
+                           mode = "lines")
     
-    # insert subtitle with information on De, n and fit method
-    mtext(substitute(D[e] == De, list(De = paste(abs(-object$output$De), 
-                                                 "+/-", object$output$De.Error, "Gy", " | n =", length(object$data$x), 
-                                                 " | fit: ", object$output$model))), side = 3, line = 0.5, cex = 0.7)
+    # set layout
+    p <- plotly::layout(p, title = paste("<b>",settings$main, "</b></br>", subtitle),
+                        margin = list(t = 60),
+                        yaxis = list(title = settings$ylab, rangemode = "nonnegative"),
+                        xaxis = list(title = settings$xlab))
     
-    # plot vertical dashed line at x=0 par(new=TRUE)
-    v.ylim <- pretty(object$data[, 2])
-    points(x = c(0, 0), y = c(0, v.ylim[length(v.ylim)]), 
-           col = settings$col, type = "l", lty = "1111AA")
+    print(p)
     
-    # plot fitted curve through data
-    # curve(EXP, lwd = 1.5, col = "black", add = TRUE, lty = 1)
-    if (object$output$model == "EXP") {
-      newX <- seq(-object$output$De, max(object$data[ ,1]), length.out = 1000)
-      newY <- predict(object$fit, list(x = newX))
-      lines(newX, newY)
-    }
-    if (object$output$model == "LIN") {
-      abline(object$fit)
-    }
-    
-    
-    ## restore previous plot parameters
-    par(.pardefault)
-    
-  }  #:EndOf plot
+  }
 }

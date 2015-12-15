@@ -207,7 +207,6 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   b <- median(na.exclude(b.start))
   c <- median(na.exclude(c.start))
   
-  
   ## ==========================================================================##
   ## CALCULATE FITTING WEIGHTS
   ## ==========================================================================##
@@ -262,12 +261,6 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   
   if (model == "LIN") {
     fit <- lm(input.data[ ,2] ~ input.data[ ,1])
-    lm.coef <- as.numeric(coef(fit))
-    De.solve <- round(-lm.coef[1] / lm.coef[2], 2)
-    CI <- confint(fit, level = 0.95)
-    De.solve.error <- round(as.numeric(dist(CI[2, ]) / 2), 2)
-    d0 <- NA
-    d0.error <- NA
   }
   
   ## ==========================================================================##
@@ -283,27 +276,40 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     #                          trace = TRUE,
     #                          control = minpack.lm::nls.lm.control(maxiter = 1000))
   }
-
+  
   ## ==========================================================================##
   ## EQUIVALENT DOSE CALCULATION
   ## ==========================================================================##
   
   if (model == "EXP") {
     # calculate De by solving SSE for x
-    De.solve <- round(-c - b * log(1 - 0/a), digits = 2)
-    
-    # obtain DE error and characteristic saturation dose D0
     if (class(fit) != "try-error") {
-      d0 <- round(nls.par["b", "Estimate"], 0)
-      CI <- confint(fit, level = 0.67)
-      De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
-      d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
+      De.solve <- round(nls.par["c", "Estimate"], 2)
+      d0 <- round(nls.par["b", "Estimate"], 2)
+      CI <- try(confint(fit, level = 0.67))
+      if (!inherits(CI, "try-error")) {
+        De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
+        d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
+      } else {
+        De.solve.error <- round(nls.par["c", "Std. Error"], 2)
+        d0.error <- round(nls.par["b", "Std. Error"], 2)
+      }
+      
     } else {
       De.solve.error <- NA
       d0 <- NA
       d0.error <- NA
       Rsqr <- NA
     }
+  }
+  
+  if (model == "LIN") {
+    lm.coef <- as.numeric(coef(fit))
+    De.solve <- round(-lm.coef[1] / lm.coef[2], 2)
+    CI <- confint(fit, level = 0.95)
+    De.solve.error <- round(as.numeric(dist(CI[2, ]) / 2), 2)
+    d0 <- NA
+    d0.error <- NA
   }
   
   ## ==========================================================================##
@@ -343,7 +349,6 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     
     nls.bs.res <- boot(input.data, nls.bs, R = bootstrap.replicates, 
                        parallel = "multicore")
-    
     
     nls.bs.des <- na.exclude(nls.bs.res$t)
     
@@ -421,7 +426,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
                   fit = fit, 
                   bootstrap = nls.bs.res)
   
-  if (plot) try(plot_DRC(results, ...))
+  if (plot) on.exit(try(plot_DRC(results, ...)))
   
   # return output data.frame and nls.object fit
   invisible(results)
