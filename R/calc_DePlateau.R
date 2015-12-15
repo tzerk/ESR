@@ -150,10 +150,10 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
     # see above: Fit loop for input.data until min.DosePoints is reached
     input.temp <- input.data[1:c(length(input.data[, 1]) - i), ]
     
-    De.storage[i + 1, ] <- as.matrix(fit_DRC(input.data = input.temp, 
-                                             fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 
-                                                                                                                            1:2])
     
+    De.storage[i + 1, ] <- suppressMessages(
+      as.matrix(fit_DRC(input.data = input.temp, 
+                        fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 1:2]))
     # update progressbar
     setTxtProgressBar(pb, i)
   }  #::EndOf.fit_loop

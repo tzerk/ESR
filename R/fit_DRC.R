@@ -232,15 +232,15 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   
   # non-linear least square fit with an SSE | a*(1-exp(-(x+c)/b))
   nls.fit <- function(x) {
-    nls.bs.res <- try(nls(EXP, data = x, 
-                          start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                          algorithm = "port", nls.control(maxiter = 500)), silent = TRUE)  #end nls
+    nls.bs.res <- suppressMessages(try(nls(EXP, data = x, 
+                                           start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                                           algorithm = "port", nls.control(maxiter = 500)), silent = TRUE))  #end nls
   }
   #
   nlsLM.fit <- function(x) {
-    nls.bs.res <- minpack.lm::nlsLM(EXP, data = x,
-                                    start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
-                                    control = minpack.lm::nls.lm.control(maxiter = 500))
+    nls.bs.res <- suppressMessages(minpack.lm::nlsLM(EXP, data = x, 
+                                                     start = c(a = a, b = b, c = c), trace = FALSE, weights = weights, 
+                                                     control = minpack.lm::nls.lm.control(maxiter = 500)))
   }
   
   if (model == "EXP") {
@@ -286,7 +286,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     if (class(fit) != "try-error") {
       De.solve <- round(nls.par["c", "Estimate"], 2)
       d0 <- round(nls.par["b", "Estimate"], 2)
-      CI <- try(confint(fit, level = 0.67))
+      CI <- suppressMessages(try(confint(fit, level = 0.67)))
       if (!inherits(CI, "try-error")) {
         De.solve.error <- round(as.numeric(dist(CI["c", ]) / 2), 2)
         d0.error <- round(as.numeric(dist(CI["b", ]) / 2), 2)
@@ -306,7 +306,7 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
   if (model == "LIN") {
     lm.coef <- as.numeric(coef(fit))
     De.solve <- round(-lm.coef[1] / lm.coef[2], 2)
-    CI <- confint(fit, level = 0.95)
+    CI <- suppressMessages(confint(fit, level = 0.95))
     De.solve.error <- round(as.numeric(dist(CI[2, ]) / 2), 2)
     d0 <- NA
     d0.error <- NA
