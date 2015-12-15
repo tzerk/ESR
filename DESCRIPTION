@@ -26,6 +26,8 @@ Imports:
     grDevices,
     stats,
     utils
+Suggests:
+    plotly
 URL: https://github.com/tzerk/ESR
 BugReports: https://github.com/tzerk/ESR/issues
 Collate:

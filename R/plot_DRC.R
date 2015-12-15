@@ -22,7 +22,6 @@
 #' 
 plot_DRC <- function(object, interactive = FALSE, ...) {
   
-  
   if (class(object$fit) == "try-error")
     stop("There is no DRC to plot (fitting failed)", call. = FALSE)
   
@@ -116,10 +115,13 @@ plot_DRC <- function(object, interactive = FALSE, ...) {
   ## INTERACTIVE plotly pkg PLOT ----
   if (settings$interactive && requireNamespace("plotly", quietly = TRUE)) {
     
+    # suffice CRAN check for 'no visible binding for global variable' NOTE
+    x <- y <- NULL
+    
     # data points
-    p <- plotly::plot_ly(obj$data, x = x, y = y, 
+    p <- plotly::plot_ly(object$data, x = x, y = y, 
                          name = "aliquot", 
-                         text = paste0("Aliquot #", seq_len(nrow(obj$data))),
+                         text = paste0("Aliquot #", seq_len(nrow(object$data))),
                          mode = "markers", 
                          showlegend = FALSE)
     
