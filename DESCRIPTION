@@ -36,6 +36,7 @@ Collate:
     'ESR-package.R'
     'app_ESR.R'
     'calc_DePlateau.R'
+    'conv_gFactor.R'
     'find_peaks.R'
     'fit_DRC.R'
     'utils.R'
