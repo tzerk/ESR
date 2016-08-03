@@ -48,7 +48,7 @@ read_Spectrum <- function(file, ...) {
   ## ... ARGS ----
   extraArgs <- list(...)
   verbose <- ifelse("verbose" %in% names(extraArgs), extraArgs$verbose, TRUE)
-  trace <- ifelse("trace" %in% names(extraArgs), extraArgs$trace, TRUE)
+  trace <- ifelse("trace" %in% names(extraArgs), extraArgs$trace, FALSE)
   records <- ifelse("n" %in% names(extraArgs), extraArgs$n, 1024L)
   sweep_width <- ifelse("sw" %in% names(extraArgs), extraArgs$sw, NA)
   
