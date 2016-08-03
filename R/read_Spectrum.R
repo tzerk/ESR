@@ -75,7 +75,7 @@ read_Spectrum <- function(file, ...) {
         sweep_width <- as.numeric(par[par==sw, 2]) / div
       start <- center_field - sweep_width
       end <- center_field + sweep_width
-      print(paste(center_field, sweep_width))
+      # print(paste(center_field, sweep_width))
       
       xval <- seq(from = start, to = end, by = (end - start) / (records - 1))
     } else {
