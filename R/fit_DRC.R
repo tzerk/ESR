@@ -216,8 +216,12 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     weights <- rep(1, length(input.data$x))
   }
   # datapoints are weighted proportionally to their ESR intensity
+  # References:
+  # Gruen & Rhodes 1991.?, ATL
+  # Gruen & Rhodes 1992. Simulating SSE ESR DRCs - weighting of intensity by inverse variance, ATL
+  # Gruen & Brumby 1994. Assessment of errors in extrapolated ESR dose response curves, RM
   if (fit.weights[1] == "prop") {
-    weights <- 1/input.data$y/(sum(1/input.data$y))  # SHOULD THIS BE 1/I^2?! (Gruen & Rhodes 1991, ATL)
+    weights <- 1/ (input.data$y/(sum(1/input.data$y)))^2
   }
   # EXPERIMENTAL: Weight datapoints by their true error in ESR intensity
   if (fit.weights[1] == "error") {
