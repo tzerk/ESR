@@ -120,8 +120,10 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   ## ==========================================================================##
   
   # set progressbar
-  pb <- txtProgressBar(min = 0, max = length(input.data[, 1]) - min.DosePoints, 
-                       char = "=", style = 3)
+  if (output.console) {
+    pb <- txtProgressBar(min = 0, max = length(input.data[, 1]) - min.DosePoints, 
+                         char = "=", style = 3)
+  }
   
   # repeatedly call fit_DRC() while removing highest datapoint after each
   # run
@@ -144,7 +146,8 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
                      bootstrap = FALSE, plot = FALSE, verbose = FALSE)$fit
       
       # update progressbar
-      setTxtProgressBar(pb, i)
+      if (output.console)
+        setTxtProgressBar(pb, i)
     }
     
     # see above: Fit loop for input.data until min.DosePoints is reached
@@ -155,11 +158,13 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
       as.matrix(fit_DRC(input.data = input.temp, 
                         fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 1:2]))
     # update progressbar
-    setTxtProgressBar(pb, i)
+    if (output.console)
+      setTxtProgressBar(pb, i)
   }  #::EndOf.fit_loop
   
   # close progressbar
-  close(pb)
+  if (output.console)
+    close(pb)
   
   # append dose and number of datapoints to De results
   De.storage <- as.data.frame(cbind(IDs, De.storage, dose))
