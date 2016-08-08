@@ -6,7 +6,7 @@
 Schellmann & Radtke (2001)}
 \usage{
 calc_DePlateau(input.data, min.DosePoints = 5, fit.weights = "equal",
-  show.grid = TRUE, output.console = TRUE)
+  show.grid = TRUE, output.console = TRUE, ...)
 }
 \arguments{
 \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame
@@ -25,7 +25,9 @@ provided, these can be used as weights by using \code{'error'}.}
 lines in plots (\code{TRUE/FALSE})}
 
 \item{output.console}{\code{\link{logical}} (with default): plot console
-output (\code{TRUE/FALSE}).}
+output (\code{TRUE/FALSE})}
+
+\item{...}{further arguments passed to \code{\link{plot}} and \code{\link{par}}.}
 }
 \value{
 Returns terminal output and a plot. In addition, a list is returned

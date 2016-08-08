@@ -30,7 +30,9 @@
 #' @param show.grid \code{\link{logical}} (with default): show horizontal grid
 #' lines in plots (\code{TRUE/FALSE})
 #' @param output.console \code{\link{logical}} (with default): plot console
-#' output (\code{TRUE/FALSE}).
+#' output (\code{TRUE/FALSE})
+#' @param ... further arguments passed to \code{\link{plot}} and \code{\link{par}}.
+#' 
 #' @return Returns terminal output and a plot. In addition, a list is returned
 #' containing the following elements:
 #' 
@@ -68,7 +70,7 @@
 #' 
 #' @export calc_DePlateau
 calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal", 
-                           show.grid = TRUE, output.console = TRUE) {
+                           show.grid = TRUE, output.console = TRUE, ...) {
   
   ## ==========================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
@@ -185,7 +187,13 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   layout(matrix(c(1, 2), 2, 1, byrow = TRUE), respect = TRUE)
   
   # general plot parameters
-  par(cex = 0.8, xaxs = "i", yaxs = "i", mfrow = c(2, 1))
+  settings <- list(cex = 0.8, xaxs = "i", yaxs = "i", mfrow = c(2, 1))
+  settings <- modifyList(settings, list(...))
+  
+  par(cex = settings$cex, 
+      xaxs = settings$xaxs, 
+      yaxs = settings$yaxs, 
+      mfrow = settings$mfrow)
   
   
   ## ----------------------------------------------------------------------------
@@ -202,7 +210,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   # add subtitle with De, De error, number of datapoints and fit method
   mtext(substitute(D[e] == De, list(De = paste(De.storage[1, 2], "+/-", 
                                                De.storage[1, 3], "Gy", " | n =", length(input.data$x), " | fit: SSE"))), 
-        side = 3, line = 0, cex = 0.8)
+        side = 3, line = 0, cex = settings$cex)
   
   # add fitted single saturating exponential
   fit.functionEXP <- function(a, b, c, x) {
@@ -256,12 +264,12 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   # add number of maximum aliquots used for De calculation above error
   # bars
   text(De.storage$max.Dose, De.storage$De + De.storage$De.Error, labels = De.storage$n, 
-       pos = 3, cex = 0.8, xpd = TRUE)
+       pos = 3, cex = settings$cex, xpd = TRUE)
   
   # add subtitle
   legend.label <- paste("De calculated from datapoint 1 to ", min.DosePoints, 
                         "..", max(De.storage$n), sep = "")
-  mtext(legend.label, side = 3, line = 0, cex = 0.8)
+  mtext(legend.label, side = 3, line = 0, cex = settings$cex)
   
   ## restore previous plot parameters
   par(.pardefault)
