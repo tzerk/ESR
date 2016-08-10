@@ -5,8 +5,8 @@
 \title{Fit and plot a dose response curve for ESR data (ESR intensity against dose)}
 \usage{
 fit_DRC(input.data, model = "EXP", fit.weights = "equal",
-  algorithm = "LM", bootstrap = FALSE, bootstrap.replicates = 999,
-  plot = FALSE, ...)
+  algorithm = "LM", mean.natural = FALSE, bootstrap = FALSE,
+  bootstrap.replicates = 999, plot = FALSE, ...)
 }
 \arguments{
 \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame
@@ -26,6 +26,10 @@ algorithm used when fitting non-linear models. If \code{'port'} the 'nl2sol'
 algorithm from the Port library is used. The default (\code{'LM'}) uses
 the implementation of the Levenberg-Marquardt algorithm from
 the \code{'minpack.lm'} package.}
+
+\item{mean.natural}{\code{\link{logical}} (with default): If there are repeated
+measurements of the natural signal should the mean amplitude be used for
+fitting?}
 
 \item{bootstrap}{\code{\link{logical}} (with default): generate replicates
 of the input data for a nonparametric bootstrap.}

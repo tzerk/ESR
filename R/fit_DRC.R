@@ -39,6 +39,10 @@
 #' algorithm from the Port library is used. The default (\code{'LM'}) uses
 #' the implementation of the Levenberg-Marquardt algorithm from
 #' the \code{'minpack.lm'} package.
+#'
+#' @param mean.natural \code{\link{logical}} (with default): If there are repeated
+#' measurements of the natural signal should the mean amplitude be used for
+#' fitting?
 #' 
 #' @param bootstrap \code{\link{logical}} (with default): generate replicates
 #' of the input data for a nonparametric bootstrap.
@@ -88,7 +92,7 @@
 #' 
 #' @export fit_DRC
 fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal", 
-                    algorithm = "LM", bootstrap = FALSE, 
+                    algorithm = "LM", mean.natural = FALSE, bootstrap = FALSE, 
                     bootstrap.replicates = 999, plot = FALSE, 
                     ...) {
   
@@ -124,6 +128,17 @@ fit_DRC <- function(input.data, model = "EXP", fit.weights = "equal",
     extraArgs$verbose
   } else {
     TRUE
+  }
+  
+  ## ==========================================================================##
+  ## MODIFY INPUT DATA
+  ## ==========================================================================##
+  if (mean.natural) {
+    nat_index <- which(input.data[,1] == 0)
+    nat_mean <- mean(input.data[nat_index, 2])
+    input.data <- input.data[-nat_index, ]
+    input.data <- rbind(c(0, nat_mean),
+                        input.data)
   }
   
   ## ==========================================================================##
