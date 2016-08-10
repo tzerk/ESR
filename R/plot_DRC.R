@@ -89,12 +89,12 @@ plot_DRC <- function(object, interactive = FALSE, ...) {
                               "+/-", object$output$De.Error, "Gy", " | n =", length(object$data$x), 
                               " | fit: ", object$output$model))
   
-  mtext(substitute(D[e] == De, subtitle), side = 3, line = 0, cex = 1)
+  mtext(substitute(D[e] == De, subtitle), side = 3, line = -1, cex = 1)
   
   
   # plot vertical dashed line at x=0 par(new=TRUE)
   v.ylim <- pretty(object$data[, 2])
-  points(x = c(0, 0), y = c(0, v.ylim[length(v.ylim)] * 0.95), 
+  points(x = c(0, 0), y = c(0, max(pretty(range(v.ylim[length(v.ylim)]))) * 0.9), 
          col = settings$col, type = "l", lty = "1111AA")
   
   # plot fitted curve through data
