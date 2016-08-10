@@ -21,16 +21,25 @@
 #' @param input.data \code{\link{data.frame}} (\bold{required}): data frame
 #' with two columns for x=Dose, y=ESR.intensity. Optional: a third column
 #' containing individual ESR intensity errors can be provided.
+#' 
 #' @param min.DosePoints \code{\link{integer}} (with default): minimum number
 #' of datapoints used for fitting the single saturating exponential.
+#' 
 #' @param fit.weights \code{\link{logical}} (with default): option whether the
 #' fitting is done with equal weights (\code{'equal'}) or weights proportional
 #' to intensity (\code{'prop'}). If individual ESR intensity errors are
 #' provided, these can be used as weights by using \code{'error'}.
+#' 
+#' @param mean.natural \code{\link{logical}} (with default): If there are repeated
+#' measurements of the natural signal should the mean amplitude be used for
+#' fitting?
+#' 
 #' @param show.grid \code{\link{logical}} (with default): show horizontal grid
 #' lines in plots (\code{TRUE/FALSE})
+#' 
 #' @param output.console \code{\link{logical}} (with default): plot console
 #' output (\code{TRUE/FALSE})
+#' 
 #' @param ... further arguments passed to \code{\link{plot}} and \code{\link{par}}.
 #' 
 #' @return Returns terminal output and a plot. In addition, a list is returned
@@ -45,15 +54,19 @@
 #' methods} \cr Currently, only fitting of a single saturating exponential is
 #' supported. Fitting of two exponentials or an exponential with a linear term
 #' may be implemented in a future release.
+#' 
 #' @author Christoph Burow, University of Cologne (Germany) Who wrote it
+#' 
 #' @seealso \code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
 #' \code{\link{fit_DRC}}
+#' 
 #' @references Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of
 #' equivalent dose and error calculation and display in OSL dating: An overview
 #' and some recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
 #' Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
 #' 2012. Introducing an R package for luminescence dating analysis. Ancient TL,
 #' 30 (1), pp 1-8.
+#' 
 #' @examples
 #' 
 #' \dontrun{
@@ -69,8 +82,8 @@
 #' }
 #' 
 #' @export calc_DePlateau
-calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal", 
-                           show.grid = TRUE, output.console = TRUE, ...) {
+calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal",
+                           mean.natural = FALSE, show.grid = TRUE, output.console = TRUE, ...) {
   
   ## ==========================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
@@ -139,13 +152,16 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
       
       # call fit_DRC() and save De and De.Error to De container
       De.storage[i, ] <- as.matrix(fit_DRC(input.data = input.temp, 
-                                           fit.weights = fit.weights, plot = FALSE, bootstrap = FALSE, 
+                                           fit.weights = fit.weights,
+                                           mean.natural = mean.natural,
+                                           plot = FALSE, bootstrap = FALSE, 
                                            verbose = FALSE)$output[1, 1:2])
       
       # call fit_DRC() with all datapoints and retrieve nls fit object for
       # the dose response curve plot
-      fit <- fit_DRC(input.data = input.data, fit.weights = fit.weights, 
-                     bootstrap = FALSE, plot = FALSE, verbose = FALSE)$fit
+      fit <- fit_DRC(input.data = input.data, fit.weights = fit.weights,
+                     mean.natural = mean.natural, bootstrap = FALSE,
+                     plot = FALSE, verbose = FALSE)$fit
       
       # update progressbar
       if (output.console)
@@ -157,7 +173,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
     
     
     De.storage[i + 1, ] <- suppressMessages(
-      as.matrix(fit_DRC(input.data = input.temp, 
+      as.matrix(fit_DRC(input.data = input.temp, mean.natural = mean.natural, 
                         fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 1:2]))
     # update progressbar
     if (output.console)
