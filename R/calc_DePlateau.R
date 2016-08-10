@@ -187,13 +187,15 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   layout(matrix(c(1, 2), 2, 1, byrow = TRUE), respect = TRUE)
   
   # general plot parameters
-  settings <- list(cex = 0.8, xaxs = "i", yaxs = "i", mfrow = c(2, 1))
+  settings <- list(cex = 0.8, xaxs = "i", yaxs = "i", mfrow = c(2, 1), line = 0,
+                  mar = c(5, 4, 4, 2) + 0.1)
   settings <- modifyList(settings, list(...))
   
   par(cex = settings$cex, 
       xaxs = settings$xaxs, 
       yaxs = settings$yaxs, 
-      mfrow = settings$mfrow)
+      mfrow = settings$mfrow,
+      mar = settings$mar)
   
   
   ## ----------------------------------------------------------------------------
@@ -210,7 +212,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   # add subtitle with De, De error, number of datapoints and fit method
   mtext(substitute(D[e] == De, list(De = paste(De.storage[1, 2], "+/-", 
                                                De.storage[1, 3], "Gy", " | n =", length(input.data$x), " | fit: SSE"))), 
-        side = 3, line = 0, cex = settings$cex)
+        side = 3, line = settings$line, cex = settings$cex)
   
   # add fitted single saturating exponential
   fit.functionEXP <- function(a, b, c, x) {
@@ -232,9 +234,10 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   ## ----------------------------------------------------------------------------
   ## PLOT 2: De-Demax Plot
   
-  plot(De.storage$max.Dose, De.storage$De, main = expression(paste("D"[e], 
-                                                                   "-D"[max], "-Plot")), pch = 19, bty = "l", xpd = TRUE, xlim = c(0, 
-                                                                                                                                   max(input.data$x) + max(input.data$x) * 0.1), ylim = c(0, max(na.exclude(De.storage$De + 
+  plot(De.storage$max.Dose, De.storage$De, main = expression(paste("D"[e],"-D"[max], "-Plot")), 
+       pch = 19, bty = "l", xpd = TRUE, 
+       xlim = c(0,max(input.data$x) + max(input.data$x) * 0.1), 
+       ylim = c(0, max(na.exclude(De.storage$De + 
                                                                                                                                                                                                               De.storage$De.Error)) + max(na.exclude(De.storage$De + De.storage$De.Error)) * 
                                                                                                                                                                                             0.25), xlab = expression(paste("maximum additive dose (Gy)")), 
        ylab = expression(paste("D"[e], " (Gy)")))
@@ -269,7 +272,7 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
   # add subtitle
   legend.label <- paste("De calculated from datapoint 1 to ", min.DosePoints, 
                         "..", max(De.storage$n), sep = "")
-  mtext(legend.label, side = 3, line = 0, cex = settings$cex)
+  mtext(legend.label, side = 3, line = settings$line, cex = settings$cex)
   
   ## restore previous plot parameters
   par(.pardefault)
