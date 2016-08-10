@@ -2,29 +2,44 @@
 
 #' @export
 plot.ESR.Spectrum <- function(x, ...) {
-  if ("R6" %in% class(x)) {
-    main <- x$originator
-    x <- x$data
+  
+  settings <- list(x = x,
+                   main = "",
+                   cex = 1.0,
+                   xlim = c(0,0),
+                   ylim = c(0,0),
+                   xlab = "",
+                   ylab = "Intensity (a.u.)",
+                   type = "l")
+  
+  if ("R6" %in% class(settings$x)) {
+    settings$main <- settings$x$originator
+    settings$x <- settings$x$data
   } else {
-    class(x) <- class(x)[which(class(x) != "ESR.Spectrum")]
-    main <- "ESR Spectrum"
+    class(settings$x) <- class(x)[which(class(settings$x) != "ESR.Spectrum")]
+    settings$main <- "ESR Spectrum"
   } 
-  xlim <- range(pretty(x$x))
-  if (all(x$x < 3)) {
-    xlab <- "g-factor"
-    xlim <- rev(xlim)
+  settings$xlim <- range(pretty(settings$x$x))
+  if (all(settings$x$x < 3)) {
+    settings$xlab <- "g-factor"
+    settings$xlim <- rev(settings$xlim)
   } else {
-    if (all(x$x < 2049)) {
-      xlab <- "Datapoint"
+    if (all(settings$x$x < 2049)) {
+      settings$xlab <- "Datapoint"
     } else {
-      xlab <- "Magnetic Field (G)"
+      settings$xlab <- "Magnetic Field (G)"
     }
   }
-  ylim <- range(pretty(x$y))
+  settings$ylim <- range(pretty(settings$x$y))
   
-  plot(x, type = "l", main = main, xlab = xlab, ylab = "Intensity (a.u.)", xlim = xlim, ylim = ylim, ...)
-  mtext(describe_spectrum(rev(attributes(x)$spectrum)), cex = 0.8, line = 0.25)
-  class(x) <- c("ESR.Spectrum", class(x))
+  do.call(plot, settings)
+  
+  if ("mtext" %in% names(list(...)))
+    mtext <- list(...)$mtext
+  else
+    mtext <- ESR:::describe_spectrum(rev(attributes(settings$x)$spectrum))
+  mtext(mtext, cex = 0.8, line = 0.25)
+  class(x) <- c("ESR.Spectrum", class(settings$x))
 }
 
 #' @export
