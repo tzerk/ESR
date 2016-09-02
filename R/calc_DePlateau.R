@@ -30,6 +30,9 @@
 #' to intensity (\code{'prop'}). If individual ESR intensity errors are
 #' provided, these can be used as weights by using \code{'error'}.
 #' 
+#' @param model \code{\link{character}} (with default): Currently implemented
+#' models: single-saturating exponential (\code{"EXP"}), linear (\code{"LIN"}).
+#' 
 #' @param mean.natural \code{\link{logical}} (with default): If there are repeated
 #' measurements of the natural signal should the mean amplitude be used for
 #' fitting?
@@ -82,7 +85,7 @@
 #' }
 #' 
 #' @export calc_DePlateau
-calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal",
+calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal", model = "EXP",
                            mean.natural = FALSE, show.grid = TRUE, output.console = TRUE, ...) {
   
   ## ==========================================================================##
@@ -149,20 +152,27 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
       
       # temporary container for input.data
       input.temp <- input.data[1:length(input.data[, 1]), ]
-      
+
       # call fit_DRC() and save De and De.Error to De container
-      De.storage[i, ] <- as.matrix(fit_DRC(input.data = input.temp, 
-                                           fit.weights = fit.weights,
-                                           mean.natural = mean.natural,
-                                           plot = FALSE, bootstrap = FALSE, 
-                                           verbose = FALSE)$output[1, 1:2])
+      drc <- tryCatch(fit_DRC(input.data = input.temp, 
+                               fit.weights = fit.weights,
+                               mean.natural = mean.natural,
+                               model = model,
+                               plot = FALSE, bootstrap = FALSE, 
+                               verbose = FALSE),
+                      error = function(e) { NULL }
+      )
+      
+      if (is.null(drc))
+        De.storage[i, ] <- matrix(c(NA, NA), ncol = 2)
+      else
+        De.storage[i, ] <- as.matrix(drc$output[1, 1:2])
       
       # call fit_DRC() with all datapoints and retrieve nls fit object for
       # the dose response curve plot
-      fit <- fit_DRC(input.data = input.data, fit.weights = fit.weights,
-                     mean.natural = mean.natural, bootstrap = FALSE,
-                     plot = FALSE, verbose = FALSE)$fit
-      
+      if (!is.null(drc))
+        fit <- drc$fit
+        
       # update progressbar
       if (output.console)
         setTxtProgressBar(pb, i)
@@ -171,10 +181,20 @@ calc_DePlateau <- function(input.data, min.DosePoints = 5, fit.weights = "equal"
     # see above: Fit loop for input.data until min.DosePoints is reached
     input.temp <- input.data[1:c(length(input.data[, 1]) - i), ]
     
+    drc <- tryCatch(fit_DRC(input.data = input.temp, 
+                            fit.weights = fit.weights,
+                            mean.natural = mean.natural,
+                            model = model,
+                            plot = FALSE, bootstrap = FALSE, 
+                            verbose = FALSE),
+                    error = function(e) { NULL }
+    )
     
-    De.storage[i + 1, ] <- suppressMessages(
-      as.matrix(fit_DRC(input.data = input.temp, mean.natural = mean.natural, 
-                        fit.weights = fit.weights, plot = FALSE, verbose = FALSE)$output[1, 1:2]))
+    if (is.null(drc))
+      De.storage[i + 1, ] <- matrix(c(NA, NA), ncol = 2)
+    else
+      De.storage[i + 1, ] <- as.matrix(drc$output[1, 1:2])
+
     # update progressbar
     if (output.console)
       setTxtProgressBar(pb, i)

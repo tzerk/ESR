@@ -6,7 +6,8 @@
 Schellmann & Radtke (2001)}
 \usage{
 calc_DePlateau(input.data, min.DosePoints = 5, fit.weights = "equal",
-  mean.natural = FALSE, show.grid = TRUE, output.console = TRUE, ...)
+  model = "EXP", mean.natural = FALSE, show.grid = TRUE,
+  output.console = TRUE, ...)
 }
 \arguments{
 \item{input.data}{\code{\link{data.frame}} (\bold{required}): data frame
@@ -20,6 +21,9 @@ of datapoints used for fitting the single saturating exponential.}
 fitting is done with equal weights (\code{'equal'}) or weights proportional
 to intensity (\code{'prop'}). If individual ESR intensity errors are
 provided, these can be used as weights by using \code{'error'}.}
+
+\item{model}{\code{\link{character}} (with default): Currently implemented
+models: single-saturating exponential (\code{"EXP"}), linear (\code{"LIN"}).}
 
 \item{mean.natural}{\code{\link{logical}} (with default): If there are repeated
 measurements of the natural signal should the mean amplitude be used for
