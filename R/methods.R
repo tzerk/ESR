@@ -40,7 +40,12 @@ get_spline <- function(x, ...) {
 }
 
 get_gvalues <- function(v, H, x) {
-  if (v >= 10) v <- as.numeric(paste0(strtrim(v, 1), ".", substr(v, 2, nchar(v))))
+
+  if (grepl("e+", v)) {
+    v <- format(v, scientific = FALSE)
+  }
+  if (v >= 10) 
+    v <- as.numeric(paste0(strtrim(v, 1), ".", substr(v, 2, nchar(v))))
   
   planck_const <- 6.62606957e-34 # SI: J/s 
   bohr_magneton <- 9.27400968e-24 # SI: J/T
