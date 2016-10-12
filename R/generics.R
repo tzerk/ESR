@@ -39,7 +39,8 @@ plot.ESR.Spectrum <- function(x, ...) {
   else
     mtext <- ESR:::describe_spectrum(rev(attributes(settings$x)$spectrum))
   mtext(mtext, cex = 0.8, line = 0.25)
-  class(x) <- c("ESR.Spectrum", class(settings$x))
+  
+  invisible(x)
 }
 
 #' @export
