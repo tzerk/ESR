@@ -37,7 +37,7 @@ plot.ESR.Spectrum <- function(x, ...) {
   if ("mtext" %in% names(list(...)))
     mtext <- list(...)$mtext
   else
-    mtext <- ESR:::describe_spectrum(rev(attributes(settings$x)$spectrum))
+    mtext <- describe_spectrum(rev(attributes(settings$x)$spectrum))
   mtext(mtext, cex = 0.8, line = 0.25)
   
   invisible(x)

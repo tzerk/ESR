@@ -70,8 +70,8 @@ get_peaks <- function(x, interval, th = 10) {
 align_spectrum <- function(x, reference, ...) {
   
   if (inherits(reference, "list")) {
-    if (all(sapply(spectra, function(x) inherits(x, "ESR.Spectrum"))))
-      reference <- lapply(spectra, as.data.frame)
+    if (all(sapply(reference, function(x) inherits(x, "ESR.Spectrum"))))
+      reference <- lapply(reference, as.data.frame)
 
     reference <- data.frame(x = reference[[1]][,1],
                             y = colMeans(do.call(rbind, lapply(reference, function(x) x[,2]))))
