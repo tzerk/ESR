@@ -90,9 +90,6 @@ data(ExampleData.De, envir = environment())
 fit_DRC(input.data = ExampleData.De, fit.weights = 'prop')
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany) Who wrote it
-}
 \references{
 Efron, B. & Tibshirani, R., 1993. An Introduction to the
 Bootstrap.  Chapman & Hall. \cr\cr Davison, A.C. & Hinkley, D.V., 1997.
@@ -108,4 +105,6 @@ Introducing an R package for luminescence dating analysis. Ancient TL, 30
 \code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
 \code{link{boot}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany) Who wrote it
+}

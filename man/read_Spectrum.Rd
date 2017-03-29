@@ -52,13 +52,12 @@ dir <- system.file("extdata", package = "ESR")
 specs <- read_Spectrum(dir)
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany)
-}
 \references{
 In progress
 }
 \seealso{
 \code{\link{read.table}}, \code{\link{readBin}}, \code{\link{read.csv}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany)
+}

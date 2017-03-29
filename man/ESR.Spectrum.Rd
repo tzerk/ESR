@@ -58,6 +58,7 @@ created this object}
 
 \item{\code{type}}{\code{\link{character}} currently unused}
 }}
+
 \section{Methods}{
 
 \describe{
@@ -72,6 +73,7 @@ created this object}
   \item{\code{get_peaks(x, interval, th = 10)}}{ Returns a \code{\link{vector}} of local minima and maxima in the spectrum. For details see \code{\link{find_Peaks}}. }
 }
 }
+
 \examples{
 
 ## create an object of class ESR.Spectrum
@@ -103,4 +105,3 @@ Christoph Burow, University of Cologne (Germany)
 }
 \keyword{classes}
 \keyword{methods}
-

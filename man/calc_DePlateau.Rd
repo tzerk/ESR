@@ -86,9 +86,6 @@ calc_DePlateau(input.data = ExampleData.De,
 }
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany) Who wrote it
-}
 \references{
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of
 equivalent dose and error calculation and display in OSL dating: An overview
@@ -101,4 +98,6 @@ Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
 \code{\link{plot}}, \code{\link{nls}}, \code{\link{lm}},
 \code{\link{fit_DRC}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany) Who wrote it
+}

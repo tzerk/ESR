@@ -20,6 +20,7 @@ get_diff <- function(x, order, ...) {
   return(x)
 }
 
+
 get_integral <- function(x) {
   t <- x$y
   for (i in seq_along(t)) 
@@ -38,6 +39,7 @@ get_spline <- function(x, ...) {
   attr(x, "spectrum") <- c(attr(x, "spectrum"), "spline")
   return(x)
 }
+
 
 get_gvalues <- function(v, H, x) {
 
@@ -62,4 +64,26 @@ get_gvalues <- function(v, H, x) {
 get_peaks <- function(x, interval, th = 10) {
   p <- find_Peaks(x, interval, th)
   return(p)
+}
+
+
+align_spectrum <- function(x, reference, ...) {
+  
+  if (inherits(reference, "list")) {
+    if (all(sapply(spectra, function(x) inherits(x, "ESR.Spectrum"))))
+      reference <- lapply(spectra, as.data.frame)
+
+    reference <- data.frame(x = reference[[1]][,1],
+                            y = colMeans(do.call(rbind, lapply(reference, function(x) x[,2]))))
+  }
+  
+  if (inherits(reference, "ESR.Spectrum"))
+    reference <- as.data.frame(reference)
+  
+  if (inherits(x, "ESR.Spectrum"))
+      x <- as.data.frame(x)
+  
+  lag <- abs_max_ccf(unlist(reference[ ,2]), unlist(x[ ,2]), ...)
+  x[ ,1] <- x[ ,1] + diff(range(x[,1])) / nrow(x) * lag
+  return(x)
 }

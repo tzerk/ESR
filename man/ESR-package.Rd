@@ -21,4 +21,3 @@ License: \tab GPL-3\cr}
 Christoph Burow (University of Cologne, Germany)
 }
 \keyword{package}
-

@@ -36,10 +36,9 @@ data.table::as.data.table(x)
 as.list(x)
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany)
-}
 \seealso{
 \link{R6}, \link{R6Class}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany)
+}

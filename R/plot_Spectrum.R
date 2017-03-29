@@ -23,9 +23,10 @@
 #' multiple spectra by their maximum peak. This uses smoothing splines for
 #' better results.
 #' @param shift.method \code{\link{character}} (with default): when \code{integral}
-#' (default) the peaks are shifted by the maximum intensity of the integral.
+#' the peaks are shifted by the maximum intensity of the integral.
 #' Alternatively, \code{deriv} can be used to shift the spectra by the minimum of the
-#' first derivative.
+#' first derivative. By default, \code{ccf} is used which computes the
+#' cross-correlation of two univariate series (see \code{\link{ccf}}). 
 #' @param find.peaks \code{\link{logical}} (with default): find and plot peaks
 #' (\code{TRUE/FALSE}).
 #' @param peak.range \code{\link{integer}} (with default): range of magnetic
@@ -92,7 +93,7 @@
 #' @export plot_Spectrum
 plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE, 
                           smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
-                          auto.shift = FALSE, shift.method = "integral", find.peaks = FALSE, peak.range, peak.threshold = 10, 
+                          auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE, peak.range, peak.threshold = 10, 
                           peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, 
                           ...) {
   
@@ -360,33 +361,45 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     # pos.peak.max<- unlist( lapply(spline, function(x) {
     # x[[1]][which.max(x[[2]])] }) )
     
-    if (shift.method == "integral")
-      shifter <- integrand
-    else if (shift.method == "deriv")
-      shifter <- deriv_one
-    
-    # shift peaks by maximum peak of integrand
-    pos.peak.max <- unlist(lapply(shifter, function(x) {
-      x[[1]][which.max(x[[2]])]
-    }))
-    
-    diff.peak.max <- pos.peak.max[1] - pos.peak.max
-    
-    for (i in 1:length(data)) {
-      # shift real data
-      data[[i]][, 1] <- data[[i]][, 1] + diff.peak.max[i]
-      if (smooth.spline == TRUE) {
-        # shift splines
-        spline[[i]][[1]] <- spline[[i]][[1]] + diff.peak.max[i]
-      }
-      # shift integrand
-      integrand[[i]][[1]] <- integrand[[i]][[1]] + diff.peak.max[i]
-      if (difference == TRUE) {
-        # shift spline of derivative
-        deriv_one.spline[[i]][[1]] <- deriv_one.spline[[i]][[1]] + 
-          diff.peak.max[i]
+    if (shift.method == "integral" || shift.method == "deriv") {
+      
+      if (shift.method == "integral")
+        shifter <- integrand
+      else if (shift.method == "deriv")
+        shifter <- deriv_one
+      
+      # shift peaks by maximum peak of integrand
+      pos.peak.max <- unlist(lapply(shifter, function(x) {
+        x[[1]][which.max(x[[2]])]
+      }))
+      
+      diff.peak.max <- pos.peak.max[1] - pos.peak.max
+      
+      for (i in 1:length(data)) {
+        # shift real data
+        data[[i]][, 1] <- data[[i]][, 1] + diff.peak.max[i]
+        if (smooth.spline == TRUE) {
+          # shift splines
+          spline[[i]][[1]] <- spline[[i]][[1]] + diff.peak.max[i]
+        }
+        # shift integrand
+        integrand[[i]][[1]] <- integrand[[i]][[1]] + diff.peak.max[i]
+        if (difference == TRUE) {
+          # shift spline of derivative
+          deriv_one.spline[[i]][[1]] <- deriv_one.spline[[i]][[1]] + 
+            diff.peak.max[i]
+        }
       }
     }
+    
+    if (shift.method == "ccf") {
+      names <- names(data)
+      for (i in 1:c(length(data) - 1)) {
+        data[[i+1]] <- align_spectrum(x = data[[i+1]], reference = data[[i]])
+      }
+     names(data) <- names 
+    }
+    
   }
   
   ## ==========================================================================##
@@ -574,7 +587,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
              pos = 1, cex = 0.8)
       } else {
         text(x = max(amplitudes), y = max(c(y1, y2)), labels = amp, 
-             pos = 3, , cex = 0.8)
+             pos = 3, cex = 0.8)
       }
     }
     

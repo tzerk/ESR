@@ -30,4 +30,3 @@ obj <- fit_DRC(input.data = ExampleData.De, fit.weights = 'prop')
 plot_DRC(obj)
 
 }
-

@@ -25,4 +25,3 @@ data(ExampleData.ESRspectra, envir = environment())
 In progress
 }
 \keyword{datasets}
-

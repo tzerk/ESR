@@ -30,6 +30,7 @@ created this object}
 
 \item{\code{data}}{\code{\link{data.frame}} XY data of the ESR spectrum}
 }}
+
 \section{Methods}{
 
 \describe{
@@ -38,6 +39,7 @@ created this object}
   \item{\code{set_origin(originator)}}{ Sets the originator of the object }
 }
 }
+
 \examples{
 
 ## create an empty ESR base class object
@@ -49,4 +51,3 @@ Christoph Burow, University of Cologne (Germany)
 }
 \keyword{classes}
 \keyword{methods}
-

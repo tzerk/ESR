@@ -6,7 +6,7 @@
 \usage{
 plot_Spectrum(data, difference = FALSE, integrate = FALSE,
   smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df,
-  overlay = TRUE, auto.shift = FALSE, shift.method = "integral",
+  overlay = TRUE, auto.shift = FALSE, shift.method = "ccf",
   find.peaks = FALSE, peak.range, peak.threshold = 10,
   peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, ...)
 }
@@ -37,9 +37,10 @@ multiple spectra by their maximum peak. This uses smoothing splines for
 better results.}
 
 \item{shift.method}{\code{\link{character}} (with default): when \code{integral}
-(default) the peaks are shifted by the maximum intensity of the integral.
+the peaks are shifted by the maximum intensity of the integral.
 Alternatively, \code{deriv} can be used to shift the spectra by the minimum of the
-first derivative.}
+first derivative. By default, \code{ccf} is used which computes the
+cross-correlation of two univariate series (see \code{\link{ccf}}).}
 
 \item{find.peaks}{\code{\link{logical}} (with default): find and plot peaks
 (\code{TRUE/FALSE}).}
@@ -121,10 +122,9 @@ plot_Spectrum(ExampleData.ESRspectra$Ba01,
 
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany)
-}
 \seealso{
 \code{\link{plot}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany)
+}

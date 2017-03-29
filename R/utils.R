@@ -59,3 +59,17 @@ describe_spectrum <- function(x) {
   str <- paste(str[str != ""], collapse = " ")
   return(str)
 }
+
+## -------------
+## Alignment of spectra using cross-correlation
+## Source: http://stackoverflow.com/questions/10369109/finding-lag-at-which-cross-correlation-is-maximum-ccf
+## -------------
+abs_max_ccf <- function(a, b, lag.max = length(a) / 2) {
+  d <- ccf(a, b, plot = FALSE, lag.max = lag.max)
+  cor <- d$acf[ , ,1]
+  abscor <- abs(d$acf[ , ,1])
+  lag <- d$lag[ , ,1]
+  abs.cor.max <- abscor[which.max(abscor)]
+  abs.cor.max.lag <- lag[which.max(abscor)]
+  return(abs.cor.max.lag)
+}

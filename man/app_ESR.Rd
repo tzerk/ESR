@@ -31,13 +31,12 @@ app_ESR("spectrum")
 }
 
 }
-\author{
-Christoph Burow, University of Cologne (Germany)
-}
 \references{
 In progress
 }
 \seealso{
 \code{\link{runApp}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany)
+}

@@ -187,6 +187,9 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           },
                           get_peaks = function(data = self$data, interval, th = 10) {
                             invisible(get_peaks(data, interval, th))
+                          },
+                          align_spectrum = function(x = self$data, reference) {
+                            invisible(align_spectrum(x, reference))
                           }
                         )
 )

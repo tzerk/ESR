@@ -47,4 +47,3 @@ identical(peaks1, peaks2)
 \author{
 Christoph Burow, University of Cologne (Germany)
 }
-

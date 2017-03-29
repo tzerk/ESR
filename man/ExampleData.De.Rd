@@ -24,4 +24,3 @@ data(ExampleData.De, envir = environment())
 ##
 }
 \keyword{datasets}
-
