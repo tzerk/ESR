@@ -393,11 +393,10 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     }
     
     if (shift.method == "ccf") {
-      names <- names(data)
-      for (i in 1:c(length(data) - 1)) {
-        data[[i+1]] <- align_spectrum(x = data[[i+1]], reference = data[[i]])
+      
+      for (i in 1:length(data)) {
+        data[[i]] <- align_spectrum(x = data[[i]], reference = data)
       }
-     names(data) <- names 
     }
     
   }
