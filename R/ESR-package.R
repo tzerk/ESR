@@ -16,7 +16,7 @@
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
-#' @import Luminescence boot R6 data.table shiny ggplot2 
+#' @import boot R6 data.table shiny ggplot2 
 #' googleVis graphics grDevices stats utils minpack.lm
 NULL
 

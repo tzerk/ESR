@@ -15,7 +15,6 @@ Depends:
     R (>= 3.1.2)
 Imports:
     boot,
-    Luminescence,
     R6,
     data.table,
     shiny,

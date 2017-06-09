@@ -45,14 +45,19 @@
 #' @export read_Spectrum
 read_Spectrum <- function(file, ...) {
   
-  ## ... ARGS ----
+  ## ADDITIONAL ARGS ----
   extraArgs <- list(...)
   verbose <- ifelse("verbose" %in% names(extraArgs), extraArgs$verbose, TRUE)
   trace <- ifelse("trace" %in% names(extraArgs), extraArgs$trace, FALSE)
-  records <- ifelse("n" %in% names(extraArgs), extraArgs$n, 1024L)
   sweep_width <- ifelse("sw" %in% names(extraArgs), extraArgs$sw, NA)
   
-  ## FUNCTIONS ----
+  #### -------------------------------------------------------------------------
+  ## HELPER FUNCTIONS
+  #### -------------------------------------------------------------------------
+  
+  ## ---------------------------------------
+  ## Check data type by extension
+  ## ---------------------------------------
   check_type <- function(f) {
     valid_ext <- c("txt", "zip", "asc", "spc", "dta")
     ext <- substr(tolower(f), nchar(f)-2, nchar(f))
@@ -61,65 +66,98 @@ read_Spectrum <- function(file, ...) {
     if (is.na(val)) {
       file_list <- list.files(f, paste0(valid_ext, collapse = "|"), ignore.case = TRUE)
       if (length(file_list) == 0) {
-        stop(paste("Invalid file extension:", ext), call. = FALSE)
+        stop(paste("sInvalid file extension:", ext), call. = FALSE)
       }
       ext <- list(file_list)
     }
     return(ext)
   }
   
-  get_xval <- function(par, cf, sw, div = 1) {
+  ## ---------------------------------------
+  ## Retrieve magnetic field values
+  ## (only called for .DTA and .SPC files)
+  ## ---------------------------------------
+  get_xval <- function(par, cf, sw, div = 1, records) {
     if (!is.null(par)) {
       center_field <- as.numeric(par[par==cf, 2])
       if (is.na(sweep_width))
         sweep_width <- as.numeric(par[par==sw, 2]) / div
-      start <- center_field - sweep_width
-      end <- center_field + sweep_width
+      start <- center_field - sweep_width[1] # DSC can contain duplicate entries
+      end <- center_field + sweep_width[1]
       
       if (length(sweep_width) == 0)
         stop("Couldn't find information on sweep width, importing file cancelled.", call. = FALSE)
-      
       xval <- seq(from = start, to = end, by = (end - start) / (records - 1))
     } else {
       xval <- seq(1, records, 1)
     }
   }
   
+  ## ---------------------------------------
+  ## Read data functions
+  ## ---------------------------------------
   read_data <- function(f, type, ...) {
+    
+    ## TXT
+    ## -----------------------------------------------
     if (type == "txt") {
       df <- fread(f, stringsAsFactors = FALSE)
       if (ncol(df) == 3) set(df, j = 1L, value = NULL)
       par <- NULL
     }#EndOf::txt
     
+    
+    ## ASC
+    ## -----------------------------------------------
     if (type == "asc") {
       df <- as.data.table(read.csv(f, sep = ""))
       if (ncol(df) != 2) set(df, j = c(1L, 4L, 5L), value = NULL)
       par <- NULL
     }#EndOf::asc
     
+    
+    ## ZIP (not supported)
+    ## -----------------------------------------------
     if (type == "zip") {
       df <- NULL
       par <- NULL
       message(".zip files are currently not supported. The file was skipped.")
     }#EndOf::zip
     
+    
+    ## SPC
+    ## -----------------------------------------------
     if (type == "spc") {
-      df <- as.data.table(readBin(f, "int", n = records, endian = "big", size = 4))
+      df <- as.data.table(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
       
       par <- tryCatch(
         read.table(gsub(".spc", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),
         error = function(e) { NULL },
         warning = function(w) { NULL }
       )
-      xval <- get_xval(par, "HCF", "HSW")
+      xval <- get_xval(par, "HCF", "HSW", div = 1, records = nrow(df))
       
       df <- cbind(xval, df)
     }#EndOf::spc
     
+    
+    ## DTA
+    ## -----------------------------------------------
     if (type == "dta") {
-      df <- as.data.table(readBin(f, "numeric", n = records, endian = "big", size = 8))
+      df <- as.data.table(readBin(f, "numeric", n = file.info(f)$size, endian = "big", size = 8))
       
+      # check if the file contains 2D data
+      # secondary data is stored in a .YGF file
+      if (file.exists(gsub(".dta", ".ygf", f, ignore.case = TRUE))) {
+        f2 <- gsub(".dta", ".ygf", f, ignore.case = TRUE)
+        secondary_data <- readBin(f2, "numeric", 
+                                  n = file.info(f2)$size, 
+                                  endian = "big", size = 8)
+      } else {
+        secondary_data <- NULL
+      }
+      
+      # fetch parameters from DSC file
       par <- tryCatch({
         f2 <- gsub(".dta", ".dsc", f, ignore.case = TRUE)
         x <- readLines(f2)
@@ -135,8 +173,16 @@ read_Spectrum <- function(file, ...) {
           y[[i]] <- y[[i]][y[[i]] != ""]
           
           if (length(y[[i]]) == 3L) {
-            y[[i]][1] <- paste0(y[[i]][1], " (", y[[i]][3], ")")
-            y[[i]] <- y[[i]][1:2]
+            
+            # Parameter | text | text -> 'paramter | text text'
+            if (nchar(y[[i]][3]) > 3) {
+              y[[i]] <- c(y[[i]][1], paste(y[[i]][2], y[[i]][3]))
+            } else {
+              # Parameter | value | unit -> 'parameter (unit) | value'
+              y[[i]][1] <- paste0(y[[i]][1], " (", y[[i]][3], ")")
+              y[[i]] <- y[[i]][1:2]
+              
+            }
           }
           
           if (length(y[[i]]) > 2L) {
@@ -155,17 +201,28 @@ read_Spectrum <- function(file, ...) {
       warning = function(w) { NULL }
       )
       
-      xval <- get_xval(par, "CenterField (G)", "SweepWidth (G)", 2)
+      if (!is.null(secondary_data))
+        size <- nrow(df) / length(secondary_data)
+      else
+        size <- nrow(df)
+      
+      xval <- get_xval(par, "CenterField (G)", "SweepWidth (G)", div = 2, records = size)
       
       df <- cbind(xval, df)
       
+      if (!is.null(secondary_data))
+        df$sec <- as.vector(sapply(secondary_data, function(x) rep(x, size)))
+        
     }#EndOf::dta
     
     return(list(df, par))
   }
   
-  ## CHECK TYPE ----
+  ## ---------------------------------------------------------------------------
+  ## MAIN
+  ## ---------------------------------------------------------------------------
   type <- check_type(file)
+  
   if (is.list(type)) {
     last_char <- substr(file, start = nchar(file), nchar(file))
     if (last_char != "/") file <- paste0(file, "/")
@@ -189,11 +246,22 @@ read_Spectrum <- function(file, ...) {
     df <- read_data(file, type)
     names(df) <- c("data", "par")
     
-    obj <- ESR.Spectrum$new()
+    if (all(sapply(df, is.null)))
+      return(NULL)
+    
+    if (ncol(df$data) == 2) {
+      obj <- ESR.Spectrum$new()
+    } else if (ncol(df$data) == 3) {
+      obj <- ESR.Spectrum.2D$new()
+    }
+    
     obj$set_data(df$data)
     obj$set_par(df$par)
     origin <- ifelse(grepl("/", file), gsub(".*/(?!.*/)", "", file, perl = TRUE), file)
     obj$set_origin(origin)
+    
+    if (inherits(obj, "ESR.Spectrum.2D"))
+      obj$secondary_dimension <- obj$parameter[which(obj$parameter[,1] == "YNAM"), 2]
   }
   
   ## CONSOLE ----

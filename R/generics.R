@@ -44,6 +44,33 @@ plot.ESR.Spectrum <- function(x, ...) {
 }
 
 #' @export
+plot.ESR.Spectrum.2D <- function(x, y, ...) {
+  
+  if (!requireNamespace("plotly", quietly = TRUE))
+    stop("Plotting a 2D ESR spectrum requires the 'plotly' package. To install",
+         " this package run 'install.packages('plotly')' in your R console.",
+         call. = FALSE)
+  
+  p <- plotly::plot_ly(
+    x = unique(unlist(x$data[ ,3])),
+    y = unique(unlist(x$data[ ,1])),
+    z = matrix(unlist(x$data[ ,2]), ncol = nrow(unique(x$data[,3])))
+  )
+  
+  p <- plotly::add_surface(p, showscale = FALSE, 
+                           contours = list(x = list(show = FALSE,
+                                                    color = "#444",
+                                                    highlight = TRUE),
+                                           y = list(show = FALSE,
+                                                    highlight = FALSE),
+                                           z = list(show = FALSE,
+                                                    highlight = FALSE)),
+                           opacity = 0.66)
+  
+  print(p)
+}
+
+#' @export
 summary.ESR.Spectrum <- function(object, ...) {
   return(summary(object$data, ...))
 }

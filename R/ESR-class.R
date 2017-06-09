@@ -193,3 +193,69 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                           }
                         )
 )
+
+
+#' ESR.Spectrum.2D class objects
+#' 
+#' Objects of class \code{ESR}, \code{ESR.Spectrum} are \link{R6} objects and hence are 
+#' usable in a more typical object-oriented language than R. For the user the main difference 
+#' to R's internal \code{S3} and \code{S4} object implementation is that methods for \link{R6} 
+#' objects belong to the object itself. See details.
+#' 
+#' @docType class
+#' 
+#' 
+#' 
+#' @section Methods:
+#' 
+#' See \code{ESR.Spectrum}-class
+#' 
+#' @usage 
+#' # ESR.Spectrum.2D$new()
+#' 
+#' @format \link{R6Class} generator objects
+#' @keywords classes methods
+#' @author Christoph Burow, University of Cologne (Germany)
+#' @examples
+#' 
+#' # none
+#' 
+#' @include methods.R
+#' @export
+ESR.Spectrum.2D <- R6Class("ESR.Spectrum.2D",
+                           inherit = ESR,
+                           public = list(
+                             initialize = function(...) {
+                               self$originator = super$set_origin("ESR.Spectrum.2D$new()")
+                               self$data = setnames(data.frame(matrix(ncol = 3, nrow = 1024)), c("x","y", "z"))
+                             },
+                             secondary_dimension = NA_character_,
+                             parameter = NA,
+                             set_data = function(data) {
+                               if (!is.null(data) && ncol(data) == 3) {
+                                 self$data <- setnames(data, c("x", "y", "z"))
+                                 attr(self$data, "spectrum") <- "spectrum"
+                               }
+                             },
+                             set_par = function(par) {
+                               self$parameter <- par
+                             },
+                             split = function() {
+                               
+                               lktable <- c("Microwave Power" = "Power (mW)",
+                                            "Modulation Amplitude" = "ModAmp (G)",
+                                            "Gain" = "Gain (dB)")
+                               
+                               spectra <- Map(function(x, sec) {
+                                 s <- ESR.Spectrum$new()
+                                 s$set_origin(paste0(self$originator, " (", self$secondary_dimension, " = ", round(sec, 2), ")"))
+                                 s$set_data(x[ ,1:2])
+                                 s$set_par(self$parameter)
+                                 s$parameter[which(s$parameter[ ,1] == lktable[self$secondary_dimension]), 2] <- sec
+                                 return(s)
+                               }, split(self$data, self$data$z), unique(self$data$z))
+                               
+                             },
+                             type = "2D Spectrum"
+                           )
+)
