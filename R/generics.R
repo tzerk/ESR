@@ -51,23 +51,72 @@ plot.ESR.Spectrum.2D <- function(x, y, ...) {
          " this package run 'install.packages('plotly')' in your R console.",
          call. = FALSE)
   
-  p <- plotly::plot_ly(
-    x = unique(unlist(x$data[ ,3])),
-    y = unique(unlist(x$data[ ,1])),
-    z = matrix(unlist(x$data[ ,2]), ncol = nrow(unique(x$data[,3])))
-  )
+  # Settings
+  settings <- list(dim = c("3D", "2D")[1],
+                   reverse.labels = FALSE,
+                   xlab = "NA",
+                   ylab = "Magnetic Field (G)",
+                   zlab = "ESR Intensity (a.u.)")
+  settings <- modifyList(settings, list(...))
   
-  p <- plotly::add_surface(p, showscale = FALSE, 
-                           contours = list(x = list(show = FALSE,
-                                                    color = "#444",
-                                                    highlight = TRUE),
-                                           y = list(show = FALSE,
-                                                    highlight = FALSE),
-                                           z = list(show = FALSE,
-                                                    highlight = FALSE)),
-                           opacity = 0.66)
+  # 3D Plot
+  if (settings$dim == "3D") {
+    
+    p <- plotly::plot_ly(
+      x = unique(unlist(x$data[ ,3])),
+      y = unique(unlist(x$data[ ,1])),
+      z = matrix(unlist(x$data[ ,2]), ncol = nrow(unique(x$data[,3])))
+    )
+    
+    p <- plotly::add_surface(p, 
+                             showscale = FALSE, 
+                             contours = list(x = list(show = FALSE,
+                                                      color = "#444",
+                                                      highlight = TRUE),
+                                             y = list(show = FALSE,
+                                                      highlight = FALSE),
+                                             z = list(show = FALSE,
+                                                      highlight = FALSE)),
+                             opacity = 0.66)
+    
+    p <- plotly::layout(p, 
+                        scene = list(
+                          xaxis = list(title = settings$xlab),
+                          yaxis = list(title = settings$ylab),
+                          zaxis = list(title = settings$zlab)))
+    
+  } else if (settings$dim == "2D") {
+    
+    intensities <- lapply(x$split(), function(y) {
+      as.data.frame(y)[ ,2]
+    })
+    field <- unlist(x$split()[[1]]$data[ ,1])
+    labels <- sapply(x$split(), function(y) {
+      y$originator
+    })
+    
+    if (settings$reverse.labels)
+      labels <- rev(labels)
+    
+    if (all(grepl("=", labels))) {
+      labels <- gsub("(.*)\\=", "", labels)
+      labels <- gsub("[^0-9.]", "", labels)
+    }
+    
+    p <- plotly::plot_ly(x = field)
+    
+    for (i in 1:length(intensities))
+      p <- plotly::add_trace(p, y = intensities[[i]], 
+                             name = labels[[i]],
+                             mode = "lines", type = "scatter")
+    
+    p <- plotly::layout(p, legend = list(orientation = "v"))
+    
+  }
   
   print(p)
+  
+  return(p)
 }
 
 #' @export
