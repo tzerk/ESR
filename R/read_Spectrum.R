@@ -82,8 +82,8 @@ read_Spectrum <- function(file, ...) {
       center_field <- as.numeric(par[par==cf, 2])
       if (is.na(sweep_width))
         sweep_width <- as.numeric(par[par==sw, 2]) / div
-      start <- center_field - sweep_width[1] # DSC can contain duplicate entries
-      end <- center_field + sweep_width[1]
+      start <- center_field - sweep_width[1] / 2 # DSC can contain duplicate entries
+      end <- center_field + sweep_width[1] / 2
       
       if (length(sweep_width) == 0)
         stop("Couldn't find information on sweep width, importing file cancelled.", call. = FALSE)
