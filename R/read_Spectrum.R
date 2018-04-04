@@ -2,20 +2,61 @@
 #' 
 #' Use this function to import a series of associated ESR spectra into R.
 #' 
-#' This is a wrapper function for \code{read.table}. The function should be
+#' This is a wrapper function for \code{read.table} and \code{readBin}. 
+#' The function should be
 #' used to read in a series of associated ESR spectrum files. A list with all
 #' spectrum data is returned, which can be passed to \code{plot_Spectrum}
 #' for plotting the spectra.
 #' 
-#' @param file \code{\link{character}} (required): file path or directory where
-#' the spectra files are stored.
-#' @param ... further arguments (e.g., \code{n} to specify the number of datapoints).
+#' **Binary formats**
+#' 
+#' This function is able to read in binary spectrum files produced by Bruker 
+#' ESR devices. By default (\code{device = 'auto'}), the function assumes the
+#' proper mode of the vector (integer or numeric), endianness and number of
+#' bytes per element based on the file extension. Currently, the following 
+#' devices are supported:
+#' 
+#' - **Bruker ESP300-E** (*.SPC* files): `what = 'int', endian = 'big', size = 4`
+#' - **Bruker ELEXSYS500** (*.DTA* files): `what = 'numeric', endian = 'big', size = 8`
+#' - **Bruker EMXplus** (*.SPC* files): `what = 'numeric', endian = 'little', size = 4`
+#'  
+#' Note that the Bruker ESP300-E and EMXplus devices share a common file
+#' extension (.SPC) and that `device = 'auto'` (the default) will always
+#' assume that the SPC file is from a ESP300-E. If your SPC file is
+#' from a EMXplus, however, you should manually specify this using
+#' `device = 'EMXplus'`.
+#'  
+#' 
+#' @param file \code{\link{character}} (**required**): 
+#' file path or directory where the spectra files are stored.
+#' 
+#' @param device [character] (*with default*):
+#' Manually specify the device the spectrum files were produced by.
+#' By default, the proper binary format is deduced from the file
+#' extension, which may however fail in case of ambiguous file 
+#' endings. See details.
+#' 
+#' Allowed options are:
+#' - `"auto"` (the default)
+#' - `"ESP300-E"` (.SPC)
+#' - `"ELEXSYS500"` (.DTA)
+#' - `"EMXplus"` (.SPC)
+#' 
+#' @param ... further arguments 
+#' (e.g., \code{n} to specify the number of datapoints; \code{sw} to specify
+#' the sweep width).
+#' 
 #' @return Returns a terminal output. In addition an
 #' \code{\link{R6Class}} object is returned. \cr
+#' 
 #' @export
+#' 
 #' @author Christoph Burow, University of Cologne (Germany)
+#' 
 #' @seealso \code{\link{read.table}}, \code{\link{readBin}}, \code{\link{read.csv}}
+#' 
 #' @references In progress
+#' 
 #' @examples
 #' 
 #' # Import ASCII text file
@@ -38,12 +79,23 @@
 #' file5 <- system.file("extdata", "quartz.DTA", package = "ESR")
 #' spec5 <- read_Spectrum(file5)
 #' 
+#' # Import Bruker EMXplus raw binary spectrum
+#' file6 <- system.file("extdata", "DL_alanine.spc", package = "ESR")
+#' spec6 <- read_Spectrum(file6, device = "EMXplus")
+#' 
 #' # Import all example data sets at once by providing only the directory
 #' dir <- system.file("extdata", package = "ESR")
 #' specs <- read_Spectrum(dir)
 #' 
+#' @md
 #' @export read_Spectrum
-read_Spectrum <- function(file, ...) {
+read_Spectrum <- function(file, device = "auto", ...) {
+  
+  ## SUPPORTED DEVICES ----
+  devices <- list(bruker = c("auto", "ESP300-E", "ELEXSYS500", "EMXplus"))
+  if (!is.null(device))
+    if (!device %in% unlist(devices))
+      stop("Unknown device. Only the following are supported: ", paste(unlist(devices), collapse = ", "), call. = FALSE)
   
   ## ADDITIONAL ARGS ----
   extraArgs <- list(...)
@@ -66,7 +118,7 @@ read_Spectrum <- function(file, ...) {
     if (is.na(val)) {
       file_list <- list.files(f, paste0(valid_ext, collapse = "|"), ignore.case = TRUE)
       if (length(file_list) == 0) {
-        stop(paste("sInvalid file extension:", ext), call. = FALSE)
+        stop(paste("Invalid file extension:", ext), call. = FALSE)
       }
       ext <- list(file_list)
     }
@@ -128,7 +180,12 @@ read_Spectrum <- function(file, ...) {
     ## SPC
     ## -----------------------------------------------
     if (type == "spc") {
-      df <- as.data.table(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
+      
+      if (device == "auto" || device == "ESP300-E")
+        df <- as.data.table(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
+      else if (device == "EMXplus")
+        df <- as.data.table(readBin(f, "numeric", n = file.info(f)$size, endian = "little", size = 4))
+        
       
       par <- tryCatch(
         read.table(gsub(".spc", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),

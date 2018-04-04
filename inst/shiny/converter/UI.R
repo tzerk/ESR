@@ -12,6 +12,13 @@ pageWithSidebar(
                
                fileInput('files', 'Choose spectrum files', multiple = TRUE,
                          accept=c(".txt", ".dta", ".dsc", ".spc", ".par", ".asc")),
+               selectInput("device", "Device", 
+                           choices = list(
+                             "Automatic" = "auto",
+                             "Bruker ESP300-E" = "ESP300-E",
+                             "Bruker ELEXSYS500" = "ELEXSYS500",
+                             "Bruker EMXplus" = "EMXplus"
+                           ), selected = "auto"),
                fluidRow(
                  column(width = 6, 
                         textInput("prefix", "Prefix", "")
@@ -22,6 +29,7 @@ pageWithSidebar(
                ),
                textInput("todir", "Save in directory...", value = file.path(Sys.getenv("USERPROFILE"),"Desktop")),
                
+               actionButton("btn_preview", "Preview"),
                actionButton("btn", "Convert!"),
                hr(),
                div(align = "center",
@@ -42,10 +50,12 @@ pageWithSidebar(
             helpText(HTML("<h4><b>A simple file converter for Bruker spectrum files</b></h4></br>
                           File formats of the following Bruker ESR spectrometers are currently supported:</br>
                           <li>ESP300-E X-band-Spectrometer (<code>.SPC</code> and <code>.PAR</code> extensions)</li>
-                          <li>ELEXSYS500 X-band Spectromete (<code>.DAT</code> and <code>.DSC</code> extensions)</li>")
+                          <li>EMXplus Spectrometer (<code>.SPC</code> and <code>.PAR</code> extensions)</li>
+                          <li>ELEXSYS500 X-band Spectrometer (<code>.DAT</code> and <code>.DSC</code> extensions)</li>")
             ),
             hr(),
             htmlOutput("text"),
+            plotOutput("preview"),
             
             # insert css code inside <head></head> of the generated HTML file:
             # allow open dropdown menus to reach over the container
