@@ -18,7 +18,7 @@
 #' 
 #' - **Bruker ESP300-E** (*.SPC* files): `what = 'int', endian = 'big', size = 4`
 #' - **Bruker ELEXSYS500** (*.DTA* files): `what = 'numeric', endian = 'big', size = 8`
-#' - **Bruker EMXplus** (*.SPC* files): `what = 'numeric', endian = 'little', size = 4`
+#' - **Bruker EMXplus (old)** (*.SPC* files): `what = 'numeric', endian = 'little', size = 4`
 #'  
 #' Note that the Bruker ESP300-E and EMXplus devices share a common file
 #' extension (.SPC) and that `device = 'auto'` (the default) will always

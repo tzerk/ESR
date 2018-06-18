@@ -17,7 +17,7 @@ pageWithSidebar(
                              "Automatic" = "auto",
                              "Bruker ESP300-E" = "ESP300-E",
                              "Bruker ELEXSYS500" = "ELEXSYS500",
-                             "Bruker EMXplus" = "EMXplus"
+                             "Bruker EMXplus (old)" = "EMXplus_old"
                            ), selected = "auto"),
                fluidRow(
                  column(width = 6, 
