@@ -4,15 +4,63 @@
 \alias{plot_Spectrum}
 \title{Plot ESR spectra and peak finding}
 \usage{
-plot_Spectrum(data, difference = FALSE, integrate = FALSE,
-  smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df,
-  overlay = TRUE, auto.shift = FALSE, shift.method = "ccf",
-  find.peaks = FALSE, peak.range, peak.threshold = 10,
-  peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, ...)
+plot_Spectrum(data, stacked = FALSE, normalise = FALSE, crop = TRUE,
+  y_scale_factor = 2, vertical_lines, vertical_lines_manual,
+  col_bg = "grey90", manual_shift, difference = FALSE,
+  integrate = FALSE, smooth.spline = FALSE, smooth.spline.df,
+  smooth.spline.diff.df, overlay = TRUE, auto.shift = FALSE,
+  shift.method = "ccf", find.peaks = FALSE, peak.range,
+  peak.threshold = 10, peak.information = FALSE, info = NULL,
+  plot = TRUE, add = FALSE, ...)
 }
 \arguments{
 \item{data}{\code{\link{data.frame}} (\bold{required}): data frame
 with two columns for x=magnetic.field or g.value, y=ESR.intensity.}
+
+\item{stacked}{\code{\link{logical}} (\emph{with default}):
+If \code{TRUE} this function produces a stacked plot where each spectrum is
+plotted on top of each other. Use \code{y_scale_factor} to adjust the y-axis
+scaling. Defaults to \code{FALSE}.}
+
+\item{normalise}{\code{\link{logical}} (\emph{with default}):
+If \code{TRUE} each spectrum is normalised by its individual maximum intensity
+value. This is useful to compare the spectrums structure by eliminating
+relative intensity variations. Requires \code{stacked = TRUE}. Defaults to \code{FALSE}.}
+
+\item{crop}{\code{\link{logical}} (\emph{with default}):
+If \code{TRUE} all spectra are cropped to the specified \code{xlim} range before
+applying any further signal processing (e.g. normalisation). Useful when
+plotting spectra with different scan widths. Defaults to \code{TRUE}.}
+
+\item{y_scale_factor}{\code{\link{numeric}} (\emph{with default}):
+A positive single numeric value that determines the scaling of the y-axis when
+\code{stacked = TRUE}. Lower values will bring the spectra closer to each other,
+potentially making them overlap each other. Increasing the value will
+increase the distance and flatten the spectra. Defaults to \code{2}.}
+
+\item{vertical_lines}{\code{\link{numeric}} (\emph{optional}):
+Add vertical dashed lines at specified x-axis values. See \code{\link[=abline]{abline()}}.}
+
+\item{vertical_lines_manual}{\code{\link{list}} (\emph{optional}):
+A \code{list} of vectors of \code{numeric} values to draw custom vertical lines
+in the plot. Each vector should be of the same length as the number of
+spectra provided. Each value indicates where a vertical line is drawn
+in the spectrum, starting from the bottom to the top. Example: \code{data} is
+a list with three spectra. To connect the three spectra with a vertical line
+use e.g. \code{vertical_lines_manual = list(c(3455, 3460, 3456))}. Useful, if
+the spectra are not perfectly aligned and you want to connect a particular
+are of interest with lines.}
+
+\item{col_bg}{\code{\link{character}} (\emph{with default}):
+If more than one spectrum is provided the background is \code{grey90} by default.}
+
+\item{manual_shift}{\code{\link{numeric}} (\emph{optional}):
+If all of the \code{auto.shift} methods fail to properly align all of the
+provided spectra use \code{manual_shift} to align them manually. This should be
+a vector of negative or positive \code{numeric} values the same length as the
+number of provided spectra. Example: \code{data} is a list with three spectra.
+To shift the spectra use e.g. \code{manual_shift = c(-2, 0, 0.2)}, which aligns
+the first spectrum by \code{-2} to the left and the third by \code{0.2} to the right.}
 
 \item{difference}{\code{\link{logical}} (with default): plot first
 derivative of the spectrum}

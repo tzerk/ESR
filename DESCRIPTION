@@ -14,6 +14,7 @@ Description: A collection of various R functions for the purpose of Electron
     Spin Resonance dating data analysis. This includes, amongst others, data
     import and export, growth curve fitting and plotting of ESR spectra.
 License: GPL-3
+Encoding: UTF-8
 Depends:
     R (>= 3.1.2)
 Imports:
@@ -47,4 +48,4 @@ Collate:
     'plot_Spectrum.R'
     'read_Spectrum.R'
     'zzz.R'
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.0.9000

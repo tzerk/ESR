@@ -7,44 +7,106 @@
 #' 
 #' @param data \code{\link{data.frame}} (\bold{required}): data frame
 #' with two columns for x=magnetic.field or g.value, y=ESR.intensity.
+#' 
+#' @param stacked [`logical`] (*with default*):
+#' If `TRUE` this function produces a stacked plot where each spectrum is
+#' plotted on top of each other. Use `y_scale_factor` to adjust the y-axis
+#' scaling. Defaults to `FALSE`.
+#' 
+#' @param normalise [`logical`] (*with default*):
+#' If `TRUE` each spectrum is normalised by its individual maximum intensity
+#' value. This is useful to compare the spectrums structure by eliminating 
+#' relative intensity variations. Requires `stacked = TRUE`. Defaults to `FALSE`.
+#' 
+#' @param crop [`logical`] (*with default*):
+#' If `TRUE` all spectra are cropped to the specified `xlim` range before
+#' applying any further signal processing (e.g. normalisation). Useful when 
+#' plotting spectra with different scan widths. Defaults to `TRUE`.
+#' 
+#' @param y_scale_factor [`numeric`] (*with default*):
+#' A positive single numeric value that determines the scaling of the y-axis when
+#' `stacked = TRUE`. Lower values will bring the spectra closer to each other,
+#' potentially making them overlap each other. Increasing the value will
+#' increase the distance and flatten the spectra. Defaults to `2`.
+#' 
+#' @param vertical_lines [`numeric`] (*optional*):
+#' Add vertical dashed lines at specified x-axis values. See [`abline()`].
+#' 
+#' @param vertical_lines_manual [`list`] (*optional*):
+#' A `list` of vectors of `numeric` values to draw custom vertical lines
+#' in the plot. Each vector should be of the same length as the number of 
+#' spectra provided. Each value indicates where a vertical line is drawn
+#' in the spectrum, starting from the bottom to the top. Example: `data` is
+#' a list with three spectra. To connect the three spectra with a vertical line
+#' use e.g. `vertical_lines_manual = list(c(3455, 3460, 3456))`. Useful, if 
+#' the spectra are not perfectly aligned and you want to connect a particular
+#' are of interest with lines.
+#' 
+#' @param col_bg [`character`] (*with default*):
+#' If more than one spectrum is provided the background is `grey90` by default.
+#' 
+#' @param manual_shift [`numeric`] (*optional*): 
+#' If all of the `auto.shift` methods fail to properly align all of the 
+#' provided spectra use `manual_shift` to align them manually. This should be
+#' a vector of negative or positive `numeric` values the same length as the
+#' number of provided spectra. Example: `data` is a list with three spectra.
+#' To shift the spectra use e.g. `manual_shift = c(-2, 0, 0.2)`, which aligns
+#' the first spectrum by `-2` to the left and the third by `0.2` to the right.
+#' 
 #' @param difference \code{\link{logical}} (with default): plot first
 #' derivative of the spectrum
+#' 
 #' @param integrate \code{\link{logical}} (with default): plot integrand of the
 #' spectrum
+#' 
 #' @param smooth.spline \code{\link{logical}} (with default): fit a cubic
 #' smoothing spline to supplied spectrum.
+#' 
 #' @param smooth.spline.df \code{\link{integer}}: desired number of degrees of
 #' freedom
+#' 
 #' @param smooth.spline.diff.df \code{\link{integer}}: desired number of
 #' degrees of freedom for splines of the first derivative
+#' 
 #' @param overlay \code{\link{logical}} (with default): overlay actual data and
 #' smoothing spline curve in one plot.
+#' 
 #' @param auto.shift \code{\link{logical}} (with default): automatically shift
 #' multiple spectra by their maximum peak. This uses smoothing splines for
 #' better results.
+#' 
 #' @param shift.method \code{\link{character}} (with default): when \code{integral}
 #' the peaks are shifted by the maximum intensity of the integral.
 #' Alternatively, \code{deriv} can be used to shift the spectra by the minimum of the
 #' first derivative. By default, \code{ccf} is used which computes the
 #' cross-correlation of two univariate series (see \code{\link{ccf}}). 
+#' 
 #' @param find.peaks \code{\link{logical}} (with default): find and plot peaks
 #' (\code{TRUE/FALSE}).
+#' 
 #' @param peak.range \code{\link{integer}} (with default): range of magnetic
 #' field intensities or g-values in which peaks are picked from \code{c(from,
 #' to)}. If no values are provide the whole spectrum is analysed.
+#' 
 #' @param peak.threshold \code{\link{integer}} (with default): threshold value
 #' specifying the resolution of the peak finding routine (see details).
+#' 
 #' @param peak.information \code{\link{logical}} (with default): plot peak
 #' intensity values for peaks found by the automated routine
 #' (\code{TRUE/FALSE}). Applies only when \code{find.peaks = TRUE}.
+#' 
 #' @param info \code{\link{character}}: add information on experimental details
 #' as subtitle
+#' 
 #' @param plot \code{\link{logical}} (with default): show plot
 #' (\code{TRUE/FALSE}).
+#' 
 #' @param add \code{\link{logical}} (with default): whether derivatives and/or
 #' integrands are added to the spectrum or are shown separately
 #' (\code{TRUE/FALSE}).
+#' 
 #' @param \dots Further plot arguments to pass.
+#' 
 #' @return Returns terminal output and a plot. In addition, a list is returned
 #' containing the following elements:
 #' 
@@ -52,10 +114,15 @@
 #' containing the spline objects} \item{auto.peaks}{data frame containing the
 #' peak information (magnetic field and ESR intensity) found by the peak find
 #' routine.}
+#' 
 #' @export
+#' 
 #' @note In progress
+#' 
 #' @author Christoph Burow, University of Cologne (Germany)
+#' 
 #' @seealso \code{\link{plot}}
+#' 
 #' @examples
 #' 
 #' 
@@ -90,8 +157,13 @@
 #'                  overlay = FALSE)
 #' 
 #' 
+#' @md
 #' @export plot_Spectrum
-plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE, 
+plot_Spectrum <- function(data, 
+                          stacked = FALSE, normalise = FALSE, crop = TRUE, y_scale_factor = 2, 
+                          vertical_lines, vertical_lines_manual, col_bg = "grey90",
+                          manual_shift,
+                          difference = FALSE, integrate = FALSE, 
                           smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
                           auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE, peak.range, peak.threshold = 10, 
                           peak.information = FALSE, info = NULL, plot = TRUE, add = FALSE, 
@@ -127,13 +199,38 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
       names(data) <- names
     }
   }
-
-  else stop("\n [plot_Spectrum] >> data has to be of type data.fame, data.table list or ESR.Spectrum!")
   
+  else stop("\n [plot_Spectrum] >> data has to be of type data.fame, data.table list or ESR.Spectrum!", call. = FALSE)
+  
+  
+  ## check input lengths
+  if (!missing(manual_shift)) {
+   if (length(manual_shift) != length(data))
+     stop("Arg 'manual_shift' must be the same length of provided 'data'.", call. = FALSE)
+    else if (any(!is.numeric(manual_shift)))
+     stop("Arg 'manual_shift' must only contain 'numeric' values.", call. = FALSE)
+      
+  }
+  
+  if (!missing(vertical_lines))
+    if (!is.numeric(vertical_lines))
+      stop("Arg 'vertical_lines' must be 'numeric' vector.", call. = FALSE)
+  
+  if (!missing(vertical_lines_manual)) {
+    if (!is.list(vertical_lines_manual))
+      stop("Arg 'vertical_lines' must be a 'list' of 'numeric' vectors.", call. = FALSE)
+    else if (any(!sapply(vertical_lines_manual, is.numeric)))
+      stop("Arg 'vertical_lines' must be a 'list' of 'numeric' vectors.", call. = FALSE)
+  }
+  
+  if (length(y_scale_factor) != 1 || !is.numeric(y_scale_factor))
+    stop("Arg 'y_scale_factor' must be a single 'numeric' value.", call. = FALSE)
+    
+    
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ## ==========================================================================##
-
+  
   # save column names for legend
   if (length(data) > 1)
     colnames <- names(data)
@@ -141,12 +238,12 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   # if list is unnamed, grep colnames; else, disable legend and warn user
   if (is.null(colnames))
     colnames <- colnames(data)
-
+  
   if (is.null(colnames)) {
     message("Warning: plotting the legend requires a named list!")
   }
-    
-    
+  
+  
   # difference
   if (difference == TRUE || auto.shift == TRUE) {
     temp <- lapply(data, function(x) {
@@ -210,6 +307,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     })
   }
   
+  
   ## ==========================================================================##
   ## CHECK ... ARGUMENTS
   ## ==========================================================================##
@@ -256,6 +354,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     # xlim<- c(min(data[[1]][1])*0.9998,
     # max(data[[1]][1])*1.0002)
     xlim <- range(pretty(c(min(data[[1]][1]), max(data[[1]][1]))))
+    xlim <- range(pretty( do.call(rbind, data)[ ,1] ))
   }
   
   if ("main" %in% names(extraArgs)) {
@@ -401,6 +500,54 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     
   }
   
+  
+  ## ==========================================================================##
+  ## SHIFT SPECTRA
+  ## ==========================================================================##
+  if (!missing(manual_shift)) {
+    
+    for (i in 1:length(data))
+      data[[i]][ ,1] <- data[[i]][ ,1] + manual_shift[i]
+    
+  }
+  
+  ## ==========================================================================##
+  ## STACKED PLOT
+  ## ==========================================================================##
+  if (stacked) {
+    
+    ## Determine global maximum y-value
+    ymax_global <- max(abs(do.call(rbind, data)[ ,2]))
+    
+    ## Crop spectra before normalising
+    if (crop) {
+      for(i in 1:length(data)) {
+        data[[i]] <- data[[i]][which(data[[i]][,1] >= xlim[1] & data[[i]][,1] <= xlim[2]), ]
+      }
+    }
+    
+    ## Normalise all spectra and set y-offset
+    for (i in 1:length(data)) {
+      ymax <- max(abs(data[[i]][ ,2]))
+      
+      if (normalise)
+        data[[i]][ ,2] <- data[[i]][ ,2] / ymax
+      else 
+        data[[i]][ ,2] <- data[[i]][ ,2] / ymax_global
+      
+      data[[i]][ ,2] <- data[[i]][ ,2] + i * y_scale_factor
+    }
+    
+    ## Re-set ylim values
+    ## Determine global y-axis limit
+    all_y <- do.call(rbind, data)[ ,2]
+    ylim <- c(
+      ifelse(min(all_y) < 0, min(all_y) * 1.05, min(all_y) * 0.95),
+      ifelse(max(all_y) > 0, max(all_y) * 1.05, max(all_y) * 0.95)
+    )
+    
+  }
+  
   ## ==========================================================================##
   ## FIND PEAKS
   ## ==========================================================================##
@@ -436,7 +583,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     for (i in 1:length(data[[1]]$x)) {
       # find max peaks
       if (any(abs(data[[1]]$y[i:c(i + if (i + peak.threshold > 
-                                                  length(data[[1]]$x)) {
+                                          length(data[[1]]$x)) {
         length(data[[1]]$x) - i
       } else {
         peak.threshold
@@ -449,7 +596,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
         }):i]) > abs(data[[1]]$y[i])) == TRUE) {
         } else {
           if (data[[1]]$x[i] > peak.range[1] && data[[1]]$x[i] < 
-                peak.range[2]) {
+              peak.range[2]) {
             peak.max.storage[i, ] <- as.matrix(c(data[[1]]$x[i], 
                                                  data[[1]]$y[i]))
           }
@@ -458,7 +605,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
       }
       # find min peaks
       if (any(abs(data[[1]]$y[i:c(i + if (i + peak.threshold > 
-                                                  length(data[[1]]$x)) {
+                                          length(data[[1]]$x)) {
         length(data[[1]]$x) - i
       } else {
         peak.threshold
@@ -471,7 +618,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
         }):i]) < abs(data[[1]]$y[i])) == TRUE) {
         } else {
           if (data[[1]]$x[i] > peak.range[1] && data[[1]]$x[i] < 
-                peak.range[2]) {
+              peak.range[2]) {
             peak.min.storage[i, ] <- as.matrix(c(data[[1]]$x[i], 
                                                  data[[1]]$y[i]))
           }
@@ -517,7 +664,11 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     
     # create empty plot
     plot(NA, NA, ylim = ylim, xlim = xlim, bty = "n", xpd = FALSE, 
-         xlab = xlab, ylab = ylab)
+         xlab = xlab, ylab = ylab,
+         yaxt = "n")
+    
+    if (!stacked)
+      axis(2)
     
     # add plot title
     title(main, line = if (is.null(info) == TRUE) {
@@ -592,10 +743,13 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
     
     # background of the plot region
     if (length(data) > 1) {
-      rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-           col = "grey90")
       
-      grid(col = "white", lwd = 1, lty = 1)
+      if (col_bg != "white") {
+        rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
+             col = col_bg)
+        
+        grid(col = "white", lwd = 1, lty = 1)
+      }
     }
     
     
@@ -624,21 +778,21 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
       
       # INPUT DATA
       if (add == TRUE || c(smooth.spline == FALSE && difference == 
-                             FALSE)) {
+                           FALSE)) {
         plot_line(cbind(data[[i]]$x, data[[i]]$y), 
                   col[i], "data")
       }
       
       # SPLINE
       if (c(smooth.spline == TRUE && difference == FALSE) || c(smooth.spline == 
-                                                                 TRUE && difference == TRUE && add == TRUE && overlay == 
-                                                                 TRUE)) {
+                                                               TRUE && difference == TRUE && add == TRUE && overlay == 
+                                                               TRUE)) {
         plot_line(spline[[i]], col[i], "spline")
       }
       
       # DERIVATIVE
       if (difference == TRUE && c(smooth.spline == FALSE || c(smooth.spline == 
-                                                                TRUE && overlay == TRUE))) {
+                                                              TRUE && overlay == TRUE))) {
         plot_line(deriv_one[[i]], col[i], "deriv")
       }
       
@@ -665,7 +819,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
       
       # label min/max peaks
       if (peak.information == TRUE && length(all.peaks$magnetic.field) != 
-            0) {
+          0) {
         
         if (id == TRUE) {
           text(all.peaks$magnetic.field, all.peaks$ESR.intensity, 
@@ -699,6 +853,55 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
         }
       }
     }
+    
+    ## ==========================================================================##
+    ## ADD VERTICAL LINES TO PLOT
+    ## ==========================================================================##
+    if (!missing(vertical_lines)) {
+      
+      for (i in 1:length(vertical_lines))
+        abline(v = vertical_lines[i], lty = 2)
+      
+    }
+    
+    y_offset_abs <- ifelse(y_scale_factor <= 2, 0.8, 0)
+    
+    if (!missing(vertical_lines_manual)) {
+    
+      for (i in 1:length(vertical_lines_manual)) {
+        for (j in 1:length(vertical_lines_manual[[i]])) {
+          
+          # vertical line segments
+          points(
+            x = c(vertical_lines_manual[[i]][j], vertical_lines_manual[[i]][j]),
+            # y = c(j * y_scale_factor - y_scale_factor / 2, j * y_scale_factor + y_scale_factor / 2),
+            y = c(
+              ifelse(j == 1, -1 ,data[[j]][which.min(abs(data[[j]][ ,1] - vertical_lines_manual[[i]][j])), 2] - 0.8 + y_offset_abs),
+              data[[j]][which.min(abs(data[[j]][ ,1] - vertical_lines_manual[[i]][j])), 2] + 0.8 - y_offset_abs
+            ),
+            type = "l",
+            lty = 2
+          )
+          # horizontal connecters between segments
+          if (j < length(vertical_lines_manual[[i]]))
+          points(
+            x = c(vertical_lines_manual[[i]][j], vertical_lines_manual[[i]][j+1]),
+            # y = c(j * y_scale_factor + y_scale_factor / 2, j * y_scale_factor + y_scale_factor / 2),
+            y = c(
+              data[[j]][which.min(abs(data[[j]][ ,1] - vertical_lines_manual[[i]][j])), 2] + 0.8 - y_offset_abs,
+              data[[j+1]][which.min(abs(data[[j+1]][ ,1] - vertical_lines_manual[[i]][j+1])), 2] - 0.8 + y_offset_abs
+            ),
+            type = "l",
+            lty = 2
+          )
+          
+          
+        }
+      }
+      
+    }
+    
+    
   }
   ## ==========================================================================##
   ## RETURN VALUES
@@ -725,7 +928,7 @@ plot_Spectrum <- function(data, difference = FALSE, integrate = FALSE,
   
   # plot calculus data
   plot.par <- list(ylim = ylim, xlim = xlim, ylim.integrand = if (integrate == 
-                                                                    TRUE) {
+                                                                  TRUE) {
     c(-y, y)
   } else {
     NULL
