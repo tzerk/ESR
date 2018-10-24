@@ -52,7 +52,7 @@ devices are supported:
 \itemize{
 \item \strong{Bruker ESP300-E} (\emph{.SPC} files): \code{what = 'int', endian = 'big', size = 4}
 \item \strong{Bruker ELEXSYS500} (\emph{.DTA} files): \code{what = 'numeric', endian = 'big', size = 8}
-\item \strong{Bruker EMXplus} (\emph{.SPC} files): \code{what = 'numeric', endian = 'little', size = 4}
+\item \strong{Bruker EMXplus (old)} (\emph{.SPC} files): \code{what = 'numeric', endian = 'little', size = 4}
 }
 
 Note that the Bruker ESP300-E and EMXplus devices share a common file
