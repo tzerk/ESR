@@ -6,12 +6,12 @@
 \usage{
 plot_Spectrum(data, stacked = FALSE, normalise = FALSE, crop = TRUE,
   y_scale_factor = 2, vertical_lines, vertical_lines_manual,
-  col_bg = "grey90", manual_shift, difference = FALSE,
-  integrate = FALSE, smooth.spline = FALSE, smooth.spline.df,
-  smooth.spline.diff.df, overlay = TRUE, auto.shift = FALSE,
-  shift.method = "ccf", find.peaks = FALSE, peak.range,
-  peak.threshold = 10, peak.information = FALSE, info = NULL,
-  plot = TRUE, add = FALSE, ...)
+  col_bg = "grey90", manual_shift, manual_shift_global,
+  difference = FALSE, integrate = FALSE, smooth.spline = FALSE,
+  smooth.spline.df, smooth.spline.diff.df, overlay = TRUE,
+  auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE,
+  peak.range, peak.threshold = 10, peak.information = FALSE,
+  info = NULL, plot = TRUE, add = FALSE, ...)
 }
 \arguments{
 \item{data}{\code{\link{data.frame}} (\bold{required}): data frame
@@ -61,6 +61,12 @@ a vector of negative or positive \code{numeric} values the same length as the
 number of provided spectra. Example: \code{data} is a list with three spectra.
 To shift the spectra use e.g. \code{manual_shift = c(-2, 0, 0.2)}, which aligns
 the first spectrum by \code{-2} to the left and the third by \code{0.2} to the right.}
+
+\item{manual_shift_global}{\code{\link{numeric}} (\emph{optional}):
+The same as \code{manual_shift}, but shifting all spectra by one single value.
+Useful to shift spectra according to a calibration measurement. The correction
+is applied after individual shifts of \code{manual_shift}, so it is possible
+to individually AND globally shift the spectra for proper alignment.}
 
 \item{difference}{\code{\link{logical}} (with default): plot first
 derivative of the spectrum}

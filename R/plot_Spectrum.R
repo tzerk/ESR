@@ -53,6 +53,12 @@
 #' To shift the spectra use e.g. `manual_shift = c(-2, 0, 0.2)`, which aligns
 #' the first spectrum by `-2` to the left and the third by `0.2` to the right.
 #' 
+#' @param manual_shift_global [`numeric`] (*optional*):
+#' The same as `manual_shift`, but shifting all spectra by one single value. 
+#' Useful to shift spectra according to a calibration measurement. The correction
+#' is applied after individual shifts of `manual_shift`, so it is possible
+#' to individually AND globally shift the spectra for proper alignment.
+#' 
 #' @param difference \code{\link{logical}} (with default): plot first
 #' derivative of the spectrum
 #' 
@@ -162,7 +168,7 @@
 plot_Spectrum <- function(data, 
                           stacked = FALSE, normalise = FALSE, crop = TRUE, y_scale_factor = 2, 
                           vertical_lines, vertical_lines_manual, col_bg = "grey90",
-                          manual_shift,
+                          manual_shift, manual_shift_global,
                           difference = FALSE, integrate = FALSE, 
                           smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
                           auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE, peak.range, peak.threshold = 10, 
@@ -225,7 +231,13 @@ plot_Spectrum <- function(data,
   
   if (length(y_scale_factor) != 1 || !is.numeric(y_scale_factor))
     stop("Arg 'y_scale_factor' must be a single 'numeric' value.", call. = FALSE)
-    
+  
+  if (!missing(manual_shift_global)) {
+    if (length(manual_shift_global) != 1)
+      stop("Arg 'manual_shift_global' must be a single 'numeric' value.", call. = FALSE)
+    if (!is.numeric(manual_shift_global))
+      stop("Arg 'manual_shift_global' must be a 'numeric' value", call. = FALSE)
+  }
     
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
@@ -502,12 +514,21 @@ plot_Spectrum <- function(data,
   
   
   ## ==========================================================================##
-  ## SHIFT SPECTRA
+  ## SHIFT SPECTRA (MANUAL, INDIVIDUAL)
   ## ==========================================================================##
   if (!missing(manual_shift)) {
     
     for (i in 1:length(data))
       data[[i]][ ,1] <- data[[i]][ ,1] + manual_shift[i]
+    
+  }
+  ## ==========================================================================##
+  ## SHIFT SPECTRA (MANUAL, GLOBAL)
+  ## ==========================================================================##
+  if (!missing(manual_shift_global)) {
+    
+    for (i in 1:length(data))
+      data[[i]][ ,1] <- data[[i]][ ,1] + manual_shift_global
     
   }
   
