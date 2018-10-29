@@ -6,7 +6,7 @@
 \usage{
 plot_Spectrum(data, stacked = FALSE, normalise = FALSE, crop = TRUE,
   y_scale_factor = 2, vertical_lines, vertical_lines_manual,
-  col_bg = "grey90", manual_shift, manual_shift_global,
+  col_bg = "grey90", manual_shift, manual_shift_global, gvalue = FALSE,
   difference = FALSE, integrate = FALSE, smooth.spline = FALSE,
   smooth.spline.df, smooth.spline.diff.df, overlay = TRUE,
   auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE,
@@ -67,6 +67,10 @@ The same as \code{manual_shift}, but shifting all spectra by one single value.
 Useful to shift spectra according to a calibration measurement. The correction
 is applied after individual shifts of \code{manual_shift}, so it is possible
 to individually AND globally shift the spectra for proper alignment.}
+
+\item{gvalue}{\code{\link{logical}} (\emph{with default}):
+If \code{TRUE} and all spectra are of class \code{ESR.Spectrum} with information
+on microwave frequency the magnetic field values are converted to g-values.}
 
 \item{difference}{\code{\link{logical}} (with default): plot first
 derivative of the spectrum}

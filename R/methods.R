@@ -57,7 +57,7 @@ get_gvalues <- function(v, H, x) {
     ifelse(length(x$x) > length(g), x <- x[1:c(nrow(x)-t)], g <- g[1:c(length(g)-1)]) # TODO: this causes x to loose its attributes
   }
   x$x <- g
-  class(x) <- c("ESR.Spectrum", class(x))
+  # class(x) <- c("ESR.Spectrum", class(x))
   return(x)
 }
 

@@ -59,6 +59,10 @@
 #' is applied after individual shifts of `manual_shift`, so it is possible
 #' to individually AND globally shift the spectra for proper alignment.
 #' 
+#' @param gvalue [`logical`] (*with default*):
+#' If `TRUE` and all spectra are of class `ESR.Spectrum` with information
+#' on microwave frequency the magnetic field values are converted to g-values.
+#' 
 #' @param difference \code{\link{logical}} (with default): plot first
 #' derivative of the spectrum
 #' 
@@ -168,7 +172,7 @@
 plot_Spectrum <- function(data, 
                           stacked = FALSE, normalise = FALSE, crop = TRUE, y_scale_factor = 2, 
                           vertical_lines, vertical_lines_manual, col_bg = "grey90",
-                          manual_shift, manual_shift_global,
+                          manual_shift, manual_shift_global, gvalue = FALSE,
                           difference = FALSE, integrate = FALSE, 
                           smooth.spline = FALSE, smooth.spline.df, smooth.spline.diff.df, overlay = TRUE, 
                           auto.shift = FALSE, shift.method = "ccf", find.peaks = FALSE, peak.range, peak.threshold = 10, 
@@ -184,15 +188,16 @@ plot_Spectrum <- function(data,
   if (is.data.frame(data)) {
     if (length(data) != 2)
       stop("\n Please provide a data frame with two columns (x=magnetic.field, y=ESR.intensity)")
-    if (is.data.table(data))
-      data <- as.data.frame(data)
     
     data <- list(data)
   } 
   
   else if (inherits(data, "ESR.Spectrum")) {
     name <- as.character(data$originator)
-    data <- list(as.data.frame(data$data))
+    if (gvalue) 
+      data <- list(data$get_gvalues())
+    else 
+      data <- list(data$data)
     names(data) <- name
   }
   
@@ -201,12 +206,17 @@ plot_Spectrum <- function(data,
     
     if (inherits(data[[1]], "ESR.Spectrum")) {
       names <- as.character(unlist(lapply(data, function(x) x$originator)))
-      data <- lapply(data, function(x) as.data.frame(x$data))
+      data <- lapply(data, function(x) {
+       if (gvalue)
+         x$get_gvalues()
+        else
+          x$data
+      })
       names(data) <- names
     }
   }
   
-  else stop("\n [plot_Spectrum] >> data has to be of type data.fame, data.table list or ESR.Spectrum!", call. = FALSE)
+  else stop("\n [plot_Spectrum] >> data has to be of type data.fame, list or ESR.Spectrum!", call. = FALSE)
   
   
   ## check input lengths
@@ -238,7 +248,7 @@ plot_Spectrum <- function(data,
     if (!is.numeric(manual_shift_global))
       stop("Arg 'manual_shift_global' must be a 'numeric' value", call. = FALSE)
   }
-    
+  
   ## ==========================================================================##
   ## PREPARE INPUT/OUTPUT DATA
   ## ==========================================================================##
@@ -278,7 +288,6 @@ plot_Spectrum <- function(data,
     colnames(x) <- c("x", "y")
     x
   })
-  
   
   ## ==========================================================================##
   ## INTEGRAL
@@ -512,16 +521,15 @@ plot_Spectrum <- function(data,
     
   }
   
-  
   ## ==========================================================================##
   ## SHIFT SPECTRA (MANUAL, INDIVIDUAL)
   ## ==========================================================================##
   if (!missing(manual_shift)) {
-    
     for (i in 1:length(data))
       data[[i]][ ,1] <- data[[i]][ ,1] + manual_shift[i]
     
   }
+
   ## ==========================================================================##
   ## SHIFT SPECTRA (MANUAL, GLOBAL)
   ## ==========================================================================##
@@ -532,11 +540,26 @@ plot_Spectrum <- function(data,
     
   }
   
+  
+  
+  ## ==========================================================================##
+  ## RE-SET XLIM
+  ## if any shifting occured we need to re-determine a proper x-axis limit
+  if (!missing(manual_shift) || !missing(manual_shift_global) || auto.shift) {
+
+    if (match("xlim", names(list(...)), nomatch = 0) == 0) {
+      xlim <- range(pretty(c(min(data[[1]][1]), max(data[[1]][1]))))
+      xlim <- range(pretty( do.call(rbind, data)[ ,1] ))
+    }
+  }
+  
+  
+  
   ## ==========================================================================##
   ## STACKED PLOT
   ## ==========================================================================##
   if (stacked) {
-    
+
     ## Determine global maximum y-value
     ymax_global <- max(abs(do.call(rbind, data)[ ,2]))
     
@@ -663,7 +686,7 @@ plot_Spectrum <- function(data,
   ## PLOTTING
   ## ==========================================================================##
   
-  if (plot == TRUE) {
+  if (plot) {
     
     colororder = c(rgb(0, 0, 0), rgb(0, 0, 1), rgb(0, 0.5, 0), 
                    rgb(1, 0, 0), rgb(0, 0.75, 0.75), rgb(0.75, 0, 0.75), 
@@ -683,8 +706,14 @@ plot_Spectrum <- function(data,
             0.2)
     }
     
+    # reverse x-scale if g-values are plotted
+    if (gvalue)
+      xlim <- rev(xlim)
+    
     # create empty plot
-    plot(NA, NA, ylim = ylim, xlim = xlim, bty = "n", xpd = FALSE, 
+    plot(NA, NA, 
+         ylim = ylim, 
+         xlim = xlim, bty = "n", xpd = FALSE, 
          xlab = xlab, ylab = ylab,
          yaxt = "n")
     

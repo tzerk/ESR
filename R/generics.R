@@ -40,7 +40,7 @@ plot.ESR.Spectrum <- function(x, ...) {
     mtext <- describe_spectrum(rev(attributes(settings$x)$spectrum))
   mtext(mtext, cex = 0.8, line = 0.25)
   
-  invisible(x)
+  return(x)
 }
 
 #' @export
@@ -187,18 +187,18 @@ as.ESR.Spectrum <- function(x) {
 #' @export
 # as.data.frame method for objects of class ESR.Spectrum
 as.data.frame.ESR.Spectrum <- function(x, ...) {
-  invisible(as.data.frame(x$data, ...))
+  return(x$data)
 }
 
 
 #' @export
 # as.list method for objects of class ESR.Spectrum
 as.list.ESR.Spectrum <- function(x, ...) {
-  invisible(as.list(x$data, ...))
+  return(as.list(x$data, ...))
 }
 
 #' @export
 # as.matrix method for objects of class ESR.Spectrum
 as.matrix.ESR.Spectrum <- function(x, ...) {
-  invisible(as.matrix(x$data, ...))
+  return(as.matrix(x$data, ...))
 }

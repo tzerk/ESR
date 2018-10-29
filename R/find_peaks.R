@@ -92,5 +92,5 @@ find_Peaks <- function(x, interval, th = 10) {
   setorder(all.peaks)
   setnames(all.peaks, c("magnetic.field", "ESR.intensity"))
   
-  invisible(all.peaks)
+  return(all.peaks)
 }

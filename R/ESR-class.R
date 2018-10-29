@@ -174,22 +174,22 @@ ESR.Spectrum <- R6Class("ESR.Spectrum",
                               if (any(H<=2048))
                                 return(message("Invalid or no magnetic field data!"))
                             }
-                            invisible(get_gvalues(v, H, x))
+                            return(get_gvalues(v, H, x))
                           },
                           get_diff = function(data = self$data, order = 1, ...) {
-                            invisible(get_diff(data, order, ...))
+                            return(get_diff(data, order, ...))
                           },
                           get_integral = function(data = self$data) {
-                            invisible(get_integral(data))
+                            return(get_integral(data))
                           },
                           get_spline = function(data = self$data, ...) {
-                            invisible(get_spline(data, ...))
+                            return(get_spline(data, ...))
                           },
                           get_peaks = function(data = self$data, interval, th = 10) {
-                            invisible(get_peaks(data, interval, th))
+                            return(get_peaks(data, interval, th))
                           },
                           align_spectrum = function(x = self$data, reference) {
-                            invisible(align_spectrum(x, reference))
+                            return(align_spectrum(x, reference))
                           }
                         )
 )
