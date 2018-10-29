@@ -8,12 +8,12 @@
 #' is compared to, so that lower values of \code{th} yield more peaks than higher
 #' threshold values.
 #' 
-#' @param x \code{\link{data.frame}} (required): a two column \link{data.frame} or \link{data.table}
+#' @param x \code{\link{data.frame}} (required): a two column \link{data.frame}
 #' @param interval \code{\link{numeric}}: a vector of length two specifying
 #' the range of x-values where peaks are searched
 #' @param th \code{\link{numeric}}: an integer specifying the number of neighbouring values
 #' to compare each x-value to
-#' @return A \link{data.table} containing the x- and y-values of each peak is returned.
+#' @return A \link{data.frame} containing the x- and y-values of each peak is returned.
 #' @export
 #' @author Christoph Burow, University of Cologne (Germany)
 #' @examples
@@ -33,15 +33,13 @@
 #' 
 #' @export find_Peaks
 find_Peaks <- function(x, interval, th = 10) {
-  if (!inherits(x, "data.frame") && !inherits(x, "data.table") && !inherits(x, "R6"))
-    stop("x must be a data.frame or data.table", call. = FALSE)
+  if (!inherits(x, "data.frame") && !inherits(x, "data.frame") && !inherits(x, "R6"))
+    stop("x must be a data.frame", call. = FALSE)
   
   if (inherits(x, "R6") && inherits(x, "ESR.Spectrum"))
     x <- as.data.frame(x)
   if (inherits(x, "ESR.Spectrum"))
     class(x) <- class(x)[which(class(x) != "ESR.Spectrum")]
-  if (inherits(x, "data.table"))
-    x <- as.data.frame(x)
   if (ncol(x) != 2)
     stop("x must have two columns.", call. = FALSE)
   if (missing(interval))
@@ -90,7 +88,7 @@ find_Peaks <- function(x, interval, th = 10) {
       }
     }
   }
-  all.peaks <- as.data.table(rbind(na.omit(peak.max.storage), na.omit(peak.min.storage)))
+  all.peaks <- as.data.frame(rbind(na.omit(peak.max.storage), na.omit(peak.min.storage)))
   setorder(all.peaks)
   setnames(all.peaks, c("magnetic.field", "ESR.intensity"))
   

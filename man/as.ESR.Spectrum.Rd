@@ -17,7 +17,7 @@ A generic function \code{as.ESR.Spectrum} for coercing objects
 to class "\code{ESR.Spectrum}".
 }
 \details{
-\code{as.ESR.Spectrum} currently includes methods for \link{data.frame}, \link{data.table} objects. \cr\cr
+\code{as.ESR.Spectrum} currently includes methods for \link{data.frame} objects. \cr\cr
 Methods for coercing objects of class "\code{ESR.Spectrum}" to other classes currently include: 
 \link{as.data.frame}, \link{as.data.frame}, \link{as.list}, \link{as.matrix}. Coercion from \code{ESR.Spectrum}
 to any of these classes converts the raw measurement data (\code{$data} attribute) to respective class.
@@ -32,7 +32,6 @@ x <- as.ESR.Spectrum(data.frame(seq(3350, 3450, length.out = 1024),
 ## coercion from ESR.Spectrum:
 as.matrix(x)
 as.data.frame(x)
-data.table::as.data.table(x)
 as.list(x)
 
 }

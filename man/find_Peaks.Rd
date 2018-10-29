@@ -7,7 +7,7 @@
 find_Peaks(x, interval, th = 10)
 }
 \arguments{
-\item{x}{\code{\link{data.frame}} (required): a two column \link{data.frame} or \link{data.table}}
+\item{x}{\code{\link{data.frame}} (required): a two column \link{data.frame}}
 
 \item{interval}{\code{\link{numeric}}: a vector of length two specifying
 the range of x-values where peaks are searched}
@@ -16,7 +16,7 @@ the range of x-values where peaks are searched}
 to compare each x-value to}
 }
 \value{
-A \link{data.table} containing the x- and y-values of each peak is returned.
+A \link{data.frame} containing the x- and y-values of each peak is returned.
 }
 \description{
 This is a simple algorithm to determine local minima and maxima of ESR spectra, but

@@ -16,7 +16,7 @@
 #' @docType package
 #' @author Christoph Burow (University of Cologne, Germany)
 #' @keywords package
-#' @import boot R6 data.table shiny ggplot2 
+#' @import boot R6 shiny ggplot2 data.table
 #' googleVis graphics grDevices stats utils minpack.lm
 NULL
 

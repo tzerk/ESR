@@ -162,7 +162,7 @@ read_Spectrum <- function(file, device = "auto", ...) {
     ## ASC
     ## -----------------------------------------------
     if (type == "asc") {
-      df <- as.data.table(read.csv(f, sep = ""))
+      df <- as.data.frame(read.csv(f, sep = ""))
       if (ncol(df) != 2) set(df, j = c(1L, 4L, 5L), value = NULL)
       par <- NULL
     }#EndOf::asc
@@ -182,9 +182,9 @@ read_Spectrum <- function(file, device = "auto", ...) {
     if (type == "spc") {
       
       if (device == "auto" || device == "ESP300-E")
-        df <- as.data.table(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
+        df <- as.data.frame(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
       else if (device == "EMXplus")
-        df <- as.data.table(readBin(f, "numeric", n = file.info(f)$size, endian = "little", size = 4))
+        df <- as.data.frame(readBin(f, "numeric", n = file.info(f)$size, endian = "little", size = 4))
         
       
       par <- tryCatch(
@@ -201,7 +201,7 @@ read_Spectrum <- function(file, device = "auto", ...) {
     ## DTA
     ## -----------------------------------------------
     if (type == "dta") {
-      df <- as.data.table(readBin(f, "numeric", n = file.info(f)$size, endian = "big", size = 8))
+      df <- as.data.frame(readBin(f, "numeric", n = file.info(f)$size, endian = "big", size = 8))
       
       # check if the file contains 2D data
       # secondary data is stored in a .YGF file

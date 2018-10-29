@@ -143,7 +143,7 @@ str.ESR.Spectrum <- function(object, length = 3, ...) {
 #' A generic function \code{as.ESR.Spectrum} for coercing objects
 #' to class "\code{ESR.Spectrum}".
 #' 
-#' \code{as.ESR.Spectrum} currently includes methods for \link{data.frame}, \link{data.table} objects. \cr\cr
+#' \code{as.ESR.Spectrum} currently includes methods for \link{data.frame} objects. \cr\cr
 #' Methods for coercing objects of class "\code{ESR.Spectrum}" to other classes currently include: 
 #' \link{as.data.frame}, \link{as.data.frame}, \link{as.list}, \link{as.matrix}. Coercion from \code{ESR.Spectrum}
 #' to any of these classes converts the raw measurement data (\code{$data} attribute) to respective class.
@@ -163,24 +163,19 @@ str.ESR.Spectrum <- function(object, length = 3, ...) {
 #' ## coercion from ESR.Spectrum:
 #' as.matrix(x)
 #' as.data.frame(x)
-#' data.table::as.data.table(x)
 #' as.list(x)
 #' 
 as.ESR.Spectrum <- function(x) {
   ## Input validation ----
-  if (class(x)[1] != "data.frame" && class(x)[1] != "data.table")
-    stop("Please provide an object of class data.frame or data.table", 
+  if (class(x)[1] != "data.frame")
+    stop("Please provide an object of class data.frame", 
          call. = FALSE)
   if (ncol(x) != 2L)
-    stop(paste0("Unexpected number of columns: ", ncol(x),". \n Please provide a two column data.frame or data.table."),
+    stop(paste0("Unexpected number of columns: ", ncol(x),". \n Please provide a two column data.frame."),
          call. = FALSE)
   
   # User argument as origin
   origin <- deparse(substitute(x))
-  
-  ## Coerce to data.table ----
-  if (!is.data.table(x)) 
-    x <- as.data.table(x)
   
   ## Create R6 Object ----
   obj <- ESR.Spectrum$new()
@@ -195,11 +190,6 @@ as.data.frame.ESR.Spectrum <- function(x, ...) {
   invisible(as.data.frame(x$data, ...))
 }
 
-#' @export
-# as.data.table method for objects of class ESR.Spectrum
-as.data.table.ESR.Spectrum <- function(x, ...) {
-  invisible(as.data.table(x$data, ...))
-}
 
 #' @export
 # as.list method for objects of class ESR.Spectrum
