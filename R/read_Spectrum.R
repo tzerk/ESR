@@ -129,17 +129,18 @@ read_Spectrum <- function(file, device = "auto", ...) {
   ## Retrieve magnetic field values
   ## (only called for .DTA and .SPC files)
   ## ---------------------------------------
-  get_xval <- function(par, cf, sw, div = 1, records) {
+  get_xval <- function(par, cf, sw, records) {
     if (!is.null(par)) {
       center_field <- as.numeric(par[par==cf, 2])
       if (is.na(sweep_width))
-        sweep_width <- as.numeric(par[par==sw, 2]) / div
+        sweep_width <- as.numeric(par[par==sw, 2])
       start <- center_field - sweep_width[1] / 2 # DSC can contain duplicate entries
       end <- center_field + sweep_width[1] / 2
       
       if (length(sweep_width) == 0)
         stop("Couldn't find information on sweep width, importing file cancelled.", call. = FALSE)
       xval <- seq(from = start, to = end, by = (end - start) / (records - 1))
+      
     } else {
       xval <- seq(1, records, 1)
     }
@@ -192,7 +193,7 @@ read_Spectrum <- function(file, device = "auto", ...) {
         error = function(e) { NULL },
         warning = function(w) { NULL }
       )
-      xval <- get_xval(par, "HCF", "HSW", div = 1, records = nrow(df))
+      xval <- get_xval(par, "HCF", "HSW", records = nrow(df))
       
       df <- cbind(xval, df)
     }#EndOf::spc
@@ -263,7 +264,7 @@ read_Spectrum <- function(file, device = "auto", ...) {
       else
         size <- nrow(df)
       
-      xval <- get_xval(par, "CenterField (G)", "SweepWidth (G)", div = 2, records = size)
+      xval <- get_xval(par, "CenterField (G)", "SweepWidth (G)", records = size)
       
       df <- cbind(xval, df)
       
