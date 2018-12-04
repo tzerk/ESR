@@ -186,10 +186,9 @@ read_Spectrum <- function(file, device = "auto", ...) {
         df <- as.data.frame(readBin(f, "int", n = file.info(f)$size, endian = "big", size = 4))
       else if (device == "EMXplus")
         df <- as.data.frame(readBin(f, "numeric", n = file.info(f)$size, endian = "little", size = 4))
-        
-      
+    
       par <- tryCatch(
-        read.table(gsub(".spc", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),
+        read.table(gsub(".spc$", ".par", f, ignore.case = TRUE), stringsAsFactors = FALSE),
         error = function(e) { NULL },
         warning = function(w) { NULL }
       )
@@ -203,7 +202,7 @@ read_Spectrum <- function(file, device = "auto", ...) {
     ## -----------------------------------------------
     if (type == "dta") {
       df <- as.data.frame(readBin(f, "numeric", n = file.info(f)$size, endian = "big", size = 8))
-      
+
       # check if the file contains 2D data
       # secondary data is stored in a .YGF file
       if (file.exists(gsub(".dta", ".ygf", f, ignore.case = TRUE))) {
