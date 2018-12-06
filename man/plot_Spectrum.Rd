@@ -14,7 +14,7 @@ plot_Spectrum(data, stacked = FALSE, normalise = FALSE, crop = TRUE,
   info = NULL, plot = TRUE, add = FALSE, ...)
 }
 \arguments{
-\item{data}{\code{\link{data.frame}} (\bold{required}): data frame
+\item{data}{\code{\link{data.frame}} (\strong{required}): data frame
 with two columns for x=magnetic.field or g.value, y=ESR.intensity.}
 
 \item{stacked}{\code{\link{logical}} (\emph{with default}):
@@ -124,7 +124,7 @@ as subtitle}
 integrands are added to the spectrum or are shown separately
 (\code{TRUE/FALSE}).}
 
-\item{\dots}{Further plot arguments to pass.}
+\item{...}{Further plot arguments to pass.}
 }
 \value{
 Returns terminal output and a plot. In addition, a list is returned

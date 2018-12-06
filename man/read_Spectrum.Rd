@@ -7,7 +7,7 @@
 read_Spectrum(file, device = "auto", ...)
 }
 \arguments{
-\item{file}{\code{\link{character}} (\strong{required}):
+\item{file}{\link{character} (\strong{required}):
 file path or directory where the spectra files are stored.}
 
 \item{device}{\link{character} (\emph{with default}):

@@ -5,7 +5,7 @@
 #' 
 #' \bold{Status} \cr\cr In progress
 #' 
-#' @param data \code{\link{data.frame}} (\bold{required}): data frame
+#' @param data [`data.frame`] (**required**): data frame
 #' with two columns for x=magnetic.field or g.value, y=ESR.intensity.
 #' 
 #' @param stacked [`logical`] (*with default*):
@@ -115,7 +115,7 @@
 #' integrands are added to the spectrum or are shown separately
 #' (\code{TRUE/FALSE}).
 #' 
-#' @param \dots Further plot arguments to pass.
+#' @param ... Further plot arguments to pass.
 #' 
 #' @return Returns terminal output and a plot. In addition, a list is returned
 #' containing the following elements:

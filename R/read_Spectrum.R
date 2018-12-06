@@ -27,7 +27,7 @@
 #' `device = 'EMXplus'`.
 #'  
 #' 
-#' @param file \code{\link{character}} (**required**): 
+#' @param file [character] (**required**): 
 #' file path or directory where the spectra files are stored.
 #' 
 #' @param device [character] (*with default*):
