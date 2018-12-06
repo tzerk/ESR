@@ -44,6 +44,7 @@ Collate:
     'fit_DRC.R'
     'utils.R'
     'generics.R'
+    'le_toucan.R'
     'plot_DRC.R'
     'plot_Spectrum.R'
     'read_Spectrum.R'
