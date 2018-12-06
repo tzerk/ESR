@@ -47,5 +47,6 @@ Collate:
     'plot_DRC.R'
     'plot_Spectrum.R'
     'read_Spectrum.R'
+    'write_Spectrum.R'
     'zzz.R'
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1
