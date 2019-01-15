@@ -9,7 +9,7 @@ Authors@R: c(
     )
 Author: Christoph Burow [aut, cre]
     Orlando Rodrigues [dtc]
-Maintainer: Christoph Burow <christoph.burow@uni-koeln.de>
+Maintainer: Christoph Burow <christoph.burow@gmx.net>
 Description: A collection of various R functions for the purpose of Electron
     Spin Resonance dating data analysis. This includes, amongst others, data
     import and export, growth curve fitting and plotting of ESR spectra.
