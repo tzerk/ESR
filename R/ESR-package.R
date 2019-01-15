@@ -8,7 +8,7 @@
 #' Version: 0.1.0.9031\tab \cr 
 #' Date: \tab 2015-07-03\cr 
 #' Author: \tab Christoph Burow \cr
-#' Maintainer: \tab Christoph Burow <christoph.burow@@uni-koeln.de>\cr 
+#' Maintainer: \tab Christoph Burow <christoph.burow@@gmx.net>\cr 
 #' License: \tab GPL-3\cr}
 #' 
 #' @name ESR-package
