@@ -7,6 +7,7 @@ README.md$
 appveyor.yml$
 .travis.yml$
 ^.*\misc$
+docs/
 _pkgdown.yml$
 /man/figures/
 ^.*.Rmd$
