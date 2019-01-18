@@ -11,6 +11,9 @@ status](https://ci.appveyor.com/api/projects/status/emdl7is8oa7kh5i0/branch/mast
 Status](https://travis-ci.org/tzerk/ESR.svg?branch=master)](https://travis-ci.org/tzerk/ESR)
 <!-- badges: end -->
 
+> [Find a full documentation of the package on the project
+> page](https://tzerk.github.io/ESR/)
+
 ## Overview
 
 The R package ‘ESR’ provides a collection of various R functions for
